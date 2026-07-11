@@ -31,8 +31,22 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun MomeNavHost(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    sharePayload: SharePayload? = null,
+    onShareConsumed: () -> Unit = {}
 ) {
+    LaunchedEffect(sharePayload) {
+        if (sharePayload != null) {
+            navController.navigate(
+                MomeDestination.Confirm.createRoute(
+                    sharePayload.amount,
+                    sharePayload.attachmentPath,
+                    TransactionSource.SHARE.name
+                )
+            )
+            onShareConsumed()
+        }
+    }
     NavHost(
         navController = navController,
         startDestination = MomeDestination.Home.route,
