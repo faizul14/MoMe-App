@@ -78,8 +78,11 @@ fun MomeNavHost(
 
         composable(MomeDestination.Scan.route) {
             ScanScreen(
-                onConfirm = { navController.navigate(MomeDestination.Confirm.route) },
-                onBack = { navController.popBackStack() }
+                onClose = { navController.popBackStack() },
+                onDashboard = { navController.navigate(MomeDestination.Home.route) },
+                onHistory = { navController.navigate(MomeDestination.History.route) },
+                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
+                onManage = { navController.navigate(MomeDestination.ManageBudget.route) }
             )
         }
 
@@ -99,7 +102,10 @@ fun MomeNavHost(
                 onOpenDetail = { id ->
                     navController.navigate(MomeDestination.Detail.createRoute(id))
                 },
-                onBack = { navController.popBackStack() }
+                onDashboard = { navController.navigate(MomeDestination.Home.route) },
+                onScan = { navController.navigate(MomeDestination.Scan.route) },
+                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
+                onManage = { navController.navigate(MomeDestination.ManageBudget.route) }
             )
         }
 

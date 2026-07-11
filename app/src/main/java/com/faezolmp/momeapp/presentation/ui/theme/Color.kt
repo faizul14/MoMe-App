@@ -40,3 +40,7 @@ val UploadCardBg = Color(0xFFEFF3FC)
 val DashedBorder = Color(0xFFAEB9DA)
 val NavyCardLabel = Color(0xFFAAB4E0)
 val FieldBg = Color(0xFFF1F4FB)
+
+val ScannerBackground = Color(0xFF2E313A)
+val ScannerFrame = Color(0xFFAFC0EE)
+val ScannerCaption = Color(0xFFEDEFF6)

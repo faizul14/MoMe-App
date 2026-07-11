@@ -35,7 +35,7 @@ import com.faezolmp.momeapp.presentation.ui.theme.BrandNavy
 import com.faezolmp.momeapp.presentation.ui.theme.BrandSurface
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
 
-enum class BottomTab { DASHBOARD, HISTORY, ADD, MANAGE }
+enum class BottomTab { DASHBOARD, HISTORY, SCAN, ADD, MANAGE }
 
 @Composable
 fun MomeBottomBar(
