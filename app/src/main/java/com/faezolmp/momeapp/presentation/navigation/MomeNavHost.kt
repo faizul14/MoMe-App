@@ -10,9 +10,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.faezolmp.momeapp.presentation.screen.AddManual.AddManualScreen
 import com.faezolmp.momeapp.presentation.screen.Confirm.ConfirmTransactionScreen
+import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardScreen
+import com.faezolmp.momeapp.presentation.screen.Dashboard.sampleDashboardState
 import com.faezolmp.momeapp.presentation.screen.Detail.TransactionDetailScreen
 import com.faezolmp.momeapp.presentation.screen.History.HistoryScreen
-import com.faezolmp.momeapp.presentation.screen.Home.HomeScreen
 import com.faezolmp.momeapp.presentation.screen.Onboarding.OnboardingScreen
 import com.faezolmp.momeapp.presentation.screen.Scan.ScanScreen
 import com.faezolmp.momeapp.presentation.screen.Settings.SettingsScreen
@@ -39,13 +40,14 @@ fun MomeNavHost(
         }
 
         composable(MomeDestination.Home.route) {
-            HomeScreen(
-                onAddManual = { navController.navigate(MomeDestination.AddManual.route) },
-                onScan = { navController.navigate(MomeDestination.Scan.route) },
+            DashboardScreen(
+                state = sampleDashboardState(),
+                onSeeAllActivities = { navController.navigate(MomeDestination.History.route) },
+                onActivityClick = { navController.navigate(MomeDestination.Detail.createRoute(1L)) },
                 onHistory = { navController.navigate(MomeDestination.History.route) },
-                onStatistics = { navController.navigate(MomeDestination.Statistics.route) },
-                onSettings = { navController.navigate(MomeDestination.Settings.route) },
-                onOnboarding = { navController.navigate(MomeDestination.Onboarding.route) }
+                onScan = { navController.navigate(MomeDestination.Scan.route) },
+                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
+                onManage = { navController.navigate(MomeDestination.Settings.route) }
             )
         }
 
