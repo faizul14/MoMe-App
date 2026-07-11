@@ -1,4 +1,4 @@
-package com.faezolmp.projek_android_template.ui.theme
+package com.faezolmp.projek_android_template.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build

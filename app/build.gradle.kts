@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id ("kotlin-parcelize")
 }
 
 android {
@@ -68,4 +69,10 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+//  koin
+    implementation("io.insert-koin:koin-core:3.5.6")
+    implementation("io.insert-koin:koin-android:3.5.6")
+    implementation ("io.insert-koin:koin-androidx-compose:3.5.6")
+
 }
