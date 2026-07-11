@@ -1,0 +1,107 @@
+package com.faezolmp.momeapp.presentation.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.faezolmp.momeapp.presentation.screen.AddManual.AddManualScreen
+import com.faezolmp.momeapp.presentation.screen.Confirm.ConfirmTransactionScreen
+import com.faezolmp.momeapp.presentation.screen.Detail.TransactionDetailScreen
+import com.faezolmp.momeapp.presentation.screen.History.HistoryScreen
+import com.faezolmp.momeapp.presentation.screen.Home.HomeScreen
+import com.faezolmp.momeapp.presentation.screen.Onboarding.OnboardingScreen
+import com.faezolmp.momeapp.presentation.screen.Scan.ScanScreen
+import com.faezolmp.momeapp.presentation.screen.Settings.SettingsScreen
+import com.faezolmp.momeapp.presentation.screen.Statistics.StatisticsScreen
+
+@Composable
+fun MomeNavHost(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
+    NavHost(
+        navController = navController,
+        startDestination = MomeDestination.Home.route,
+        modifier = modifier
+    ) {
+        composable(MomeDestination.Onboarding.route) {
+            OnboardingScreen(
+                onFinish = {
+                    navController.navigate(MomeDestination.Home.route) {
+                        popUpTo(MomeDestination.Home.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(MomeDestination.Home.route) {
+            HomeScreen(
+                onAddManual = { navController.navigate(MomeDestination.AddManual.route) },
+                onScan = { navController.navigate(MomeDestination.Scan.route) },
+                onHistory = { navController.navigate(MomeDestination.History.route) },
+                onStatistics = { navController.navigate(MomeDestination.Statistics.route) },
+                onSettings = { navController.navigate(MomeDestination.Settings.route) },
+                onOnboarding = { navController.navigate(MomeDestination.Onboarding.route) }
+            )
+        }
+
+        composable(MomeDestination.AddManual.route) {
+            AddManualScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(MomeDestination.Scan.route) {
+            ScanScreen(
+                onConfirm = { navController.navigate(MomeDestination.Confirm.route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(MomeDestination.Confirm.route) {
+            ConfirmTransactionScreen(
+                onSave = {
+                    navController.navigate(MomeDestination.Home.route) {
+                        popUpTo(MomeDestination.Home.route) { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(MomeDestination.History.route) {
+            HistoryScreen(
+                onOpenDetail = { id ->
+                    navController.navigate(MomeDestination.Detail.createRoute(id))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = MomeDestination.Detail.route,
+            arguments = listOf(
+                navArgument(MomeDestination.Detail.ARG_TRANSACTION_ID) {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments
+                ?.getLong(MomeDestination.Detail.ARG_TRANSACTION_ID) ?: 0L
+            TransactionDetailScreen(
+                transactionId = id,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(MomeDestination.Statistics.route) {
+            StatisticsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(MomeDestination.Settings.route) {
+            SettingsScreen(onBack = { navController.popBackStack() })
+        }
+    }
+}

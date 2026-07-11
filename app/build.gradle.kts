@@ -75,4 +75,14 @@ dependencies {
     implementation("io.insert-koin:koin-android:3.5.6")
     implementation ("io.insert-koin:koin-androidx-compose:3.5.6")
 
+//  coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+//  navigation compose
+    implementation("androidx.navigation:navigation-compose:2.6.0")
+
+//  lifecycle (StateFlow collect + viewModel compose)
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+
 }
