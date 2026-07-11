@@ -11,5 +11,6 @@ data class Transaction(
     val dateTime: Long = 0L,
     val note: String = "",
     val source: TransactionSource = TransactionSource.MANUAL,
-    val attachmentPath: String? = null
+    val attachmentPath: String? = null,
+    val isIncome: Boolean = false
 ) : Parcelable

@@ -12,5 +12,8 @@ data class BudgetSetting(
     val currencyCode: String = "IDR",
     val currencySymbol: String = "Rp",
     val decimalDigits: Int = 0,
+    val overLimitAlert: Boolean = true,
+    val eveningReminder: Boolean = false,
+    val warningThreshold: Float = 0.8f,
     val isActive: Boolean = true
 ) : Parcelable

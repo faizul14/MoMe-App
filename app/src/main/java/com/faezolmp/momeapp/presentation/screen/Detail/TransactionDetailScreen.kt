@@ -19,29 +19,26 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.faezolmp.momeapp.core.utils.formatSignedRupiah
+import com.faezolmp.momeapp.presentation.ui.categoryBackgroundOf
+import com.faezolmp.momeapp.presentation.ui.categoryColorOf
+import com.faezolmp.momeapp.presentation.ui.categoryIconOf
 import com.faezolmp.momeapp.presentation.ui.components.MomeCard
 import com.faezolmp.momeapp.presentation.ui.components.PrimaryButton
 import com.faezolmp.momeapp.presentation.ui.theme.BrandBackground
@@ -50,26 +47,18 @@ import com.faezolmp.momeapp.presentation.ui.theme.DividerColor
 import com.faezolmp.momeapp.presentation.ui.theme.ExpenseRed
 import com.faezolmp.momeapp.presentation.ui.theme.FieldBg
 import com.faezolmp.momeapp.presentation.ui.theme.FoodIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.FoodIconTint
-import com.faezolmp.momeapp.presentation.ui.theme.FunIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.FunIconTint
 import com.faezolmp.momeapp.presentation.ui.theme.IncomeGreen
 import com.faezolmp.momeapp.presentation.ui.theme.MomeAppTheme
-import com.faezolmp.momeapp.presentation.ui.theme.PinkIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.PinkIconTint
 import com.faezolmp.momeapp.presentation.ui.theme.TextMuted
 import com.faezolmp.momeapp.presentation.ui.theme.TextPrimary
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
-import com.faezolmp.momeapp.presentation.ui.theme.TransportIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.TransportIconTint
 import com.faezolmp.momeapp.presentation.ui.theme.WarnBg
 import com.faezolmp.momeapp.presentation.ui.theme.WarnTint
 
 @Composable
 fun TransactionDetailScreen(
-    transactionId: Long,
+    state: TransactionDetailUiState,
     modifier: Modifier = Modifier,
-    state: TransactionDetailUiState = sampleTransactionDetail(),
     onBack: () -> Unit = {},
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {}
@@ -149,13 +138,13 @@ private fun HeroCard(state: TransactionDetailUiState) {
                 .align(Alignment.CenterHorizontally)
                 .size(64.dp)
                 .clip(CircleShape)
-                .background(visualBackground(state.visual)),
+                .background(categoryBackgroundOf(state.colorHex)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = visualIcon(state.visual),
+                imageVector = categoryIconOf(state.iconKey),
                 contentDescription = null,
-                tint = visualTint(state.visual),
+                tint = categoryColorOf(state.colorHex),
                 modifier = Modifier.size(30.dp)
             )
         }
@@ -235,7 +224,7 @@ private fun DetailRow(label: String, value: String) {
 
 @Composable
 private fun RowDivider() {
-    androidx.compose.material3.Divider(color = DividerColor)
+    Divider(color = DividerColor)
 }
 
 @Composable
@@ -295,34 +284,10 @@ private fun DeleteButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-private fun visualIcon(visual: DetailVisual): ImageVector = when (visual) {
-    DetailVisual.FOOD -> Icons.Filled.Restaurant
-    DetailVisual.TRANSPORT -> Icons.Filled.DirectionsCar
-    DetailVisual.FUN -> Icons.Filled.SportsEsports
-    DetailVisual.SHOPPING -> Icons.Filled.ShoppingBag
-    DetailVisual.INCOME -> Icons.Filled.AccountBalanceWallet
-}
-
-private fun visualBackground(visual: DetailVisual): Color = when (visual) {
-    DetailVisual.FOOD -> FoodIconBg
-    DetailVisual.TRANSPORT -> TransportIconBg
-    DetailVisual.FUN -> FunIconBg
-    DetailVisual.SHOPPING -> PinkIconBg
-    DetailVisual.INCOME -> FunIconBg
-}
-
-private fun visualTint(visual: DetailVisual): Color = when (visual) {
-    DetailVisual.FOOD -> FoodIconTint
-    DetailVisual.TRANSPORT -> TransportIconTint
-    DetailVisual.FUN -> FunIconTint
-    DetailVisual.SHOPPING -> PinkIconTint
-    DetailVisual.INCOME -> FunIconTint
-}
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun TransactionDetailScreenPreview() {
     MomeAppTheme {
-        TransactionDetailScreen(transactionId = 1L)
+        TransactionDetailScreen(state = sampleTransactionDetail())
     }
 }

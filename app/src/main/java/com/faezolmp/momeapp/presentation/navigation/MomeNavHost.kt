@@ -1,7 +1,10 @@
 package com.faezolmp.momeapp.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,15 +14,18 @@ import androidx.navigation.navArgument
 import com.faezolmp.momeapp.presentation.screen.AddManual.AddManualScreen
 import com.faezolmp.momeapp.presentation.screen.Confirm.ConfirmTransactionScreen
 import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardScreen
-import com.faezolmp.momeapp.presentation.screen.Dashboard.sampleDashboardState
+import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardViewModel
+import com.faezolmp.momeapp.presentation.screen.Detail.DetailViewModel
 import com.faezolmp.momeapp.presentation.screen.Detail.TransactionDetailScreen
 import com.faezolmp.momeapp.presentation.screen.History.HistoryScreen
+import com.faezolmp.momeapp.presentation.screen.History.HistoryViewModel
 import com.faezolmp.momeapp.presentation.screen.Manage.ManageBudgetScreen
 import com.faezolmp.momeapp.presentation.screen.Manage.ManageCategoryScreen
 import com.faezolmp.momeapp.presentation.screen.Onboarding.OnboardingScreen
 import com.faezolmp.momeapp.presentation.screen.Scan.ScanScreen
 import com.faezolmp.momeapp.presentation.screen.Settings.SettingsScreen
 import com.faezolmp.momeapp.presentation.screen.Statistics.StatisticsScreen
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MomeNavHost(
@@ -42,10 +48,12 @@ fun MomeNavHost(
         }
 
         composable(MomeDestination.Home.route) {
+            val viewModel = koinViewModel<DashboardViewModel>()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
             DashboardScreen(
-                state = sampleDashboardState(),
+                state = state,
                 onSeeAllActivities = { navController.navigate(MomeDestination.History.route) },
-                onActivityClick = { navController.navigate(MomeDestination.Detail.createRoute(1L)) },
+                onActivityClick = { id -> navController.navigate(MomeDestination.Detail.createRoute(id)) },
                 onManageCategories = { navController.navigate(MomeDestination.ManageCategory.route) },
                 onHistory = { navController.navigate(MomeDestination.History.route) },
                 onScan = { navController.navigate(MomeDestination.Scan.route) },
@@ -57,7 +65,7 @@ fun MomeNavHost(
         composable(MomeDestination.AddManual.route) {
             AddManualScreen(
                 onBack = { navController.popBackStack() },
-                onSave = {
+                onSaved = {
                     navController.navigate(MomeDestination.Home.route) {
                         popUpTo(MomeDestination.Home.route) { inclusive = true }
                     }
@@ -111,7 +119,10 @@ fun MomeNavHost(
         }
 
         composable(MomeDestination.History.route) {
+            val viewModel = koinViewModel<HistoryViewModel>()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
             HistoryScreen(
+                state = state,
                 onOpenDetail = { id ->
                     navController.navigate(MomeDestination.Detail.createRoute(id))
                 },
@@ -132,9 +143,16 @@ fun MomeNavHost(
         ) { backStackEntry ->
             val id = backStackEntry.arguments
                 ?.getLong(MomeDestination.Detail.ARG_TRANSACTION_ID) ?: 0L
+            val viewModel = koinViewModel<DetailViewModel>()
+            LaunchedEffect(id) { viewModel.load(id) }
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
             TransactionDetailScreen(
-                transactionId = id,
-                onBack = { navController.popBackStack() }
+                state = state,
+                onBack = { navController.popBackStack() },
+                onDelete = {
+                    viewModel.delete()
+                    navController.popBackStack()
+                }
             )
         }
 

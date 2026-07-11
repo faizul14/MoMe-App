@@ -1,19 +1,19 @@
 package com.faezolmp.momeapp.presentation.screen.Detail
 
-enum class DetailVisual { FOOD, TRANSPORT, FUN, SHOPPING, INCOME }
-
 data class TransactionDetailUiState(
-    val title: String,
-    val amount: Long,
-    val isIncome: Boolean,
-    val categoryName: String,
-    val visual: DetailVisual,
-    val dateLabel: String,
-    val timeLabel: String,
-    val source: String,
-    val note: String,
-    val hasAttachment: Boolean,
-    val currencySymbol: String = "Rp"
+    val title: String = "",
+    val amount: Long = 0L,
+    val isIncome: Boolean = false,
+    val categoryName: String = "",
+    val iconKey: String = "other",
+    val colorHex: String = "#8A93AB",
+    val dateLabel: String = "",
+    val timeLabel: String = "",
+    val source: String = "",
+    val note: String = "",
+    val hasAttachment: Boolean = false,
+    val currencySymbol: String = "Rp",
+    val loaded: Boolean = false
 )
 
 fun sampleTransactionDetail(): TransactionDetailUiState = TransactionDetailUiState(
@@ -21,10 +21,12 @@ fun sampleTransactionDetail(): TransactionDetailUiState = TransactionDetailUiSta
     amount = 45_000L,
     isIncome = false,
     categoryName = "Makan & Minum",
-    visual = DetailVisual.FOOD,
+    iconKey = "food",
+    colorHex = "#E8912E",
     dateLabel = "24 Sep 2024",
     timeLabel = "12:45",
     source = "Input Manual",
     note = "Makan siang di Boga Resto bersama tim.",
-    hasAttachment = true
+    hasAttachment = true,
+    loaded = true
 )
