@@ -17,11 +17,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.content.IntentCompat
+import androidx.lifecycle.lifecycleScope
 import com.faezolmp.momeapp.core.utils.ImageStorage
 import com.faezolmp.momeapp.core.utils.ReceiptParser
 import com.faezolmp.momeapp.presentation.navigation.MomeNavHost
 import com.faezolmp.momeapp.presentation.navigation.SharePayload
 import com.faezolmp.momeapp.presentation.ui.theme.MomeAppTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -70,8 +74,12 @@ class MainActivity : ComponentActivity() {
         when {
             type.startsWith("image/") -> {
                 val uri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
-                val path = uri?.let { ImageStorage.copyFromUri(this, it) }
-                sharePayload.value = SharePayload(amount = 0L, attachmentPath = path)
+                lifecycleScope.launch {
+                    val path = uri?.let {
+                        withContext(Dispatchers.IO) { ImageStorage.copyFromUri(this@MainActivity, it) }
+                    }
+                    sharePayload.value = SharePayload(amount = 0L, attachmentPath = path)
+                }
             }
             type == "text/plain" -> {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT).orEmpty()

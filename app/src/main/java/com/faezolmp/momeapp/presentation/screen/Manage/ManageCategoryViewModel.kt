@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.faezolmp.momeapp.core.domain.model.Category
 import com.faezolmp.momeapp.core.domain.usecase.CategoryUseCase
 import com.faezolmp.momeapp.core.domain.usecase.TransactionUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -32,9 +34,10 @@ class ManageCategoryViewModel(
         categoryUseCase.all(),
         transactionUseCase.all()
     ) { categories, transactions ->
+        val countByCategory = transactions.groupingBy { it.categoryId }.eachCount()
         ManageCategoryUiState(
             categories = categories.map { category ->
-                val count = transactions.count { it.categoryId == category.id }
+                val count = countByCategory[category.id] ?: 0
                 ManageCategoryItemUi(
                     id = category.id,
                     name = category.name,
@@ -44,7 +47,7 @@ class ManageCategoryViewModel(
                 )
             }
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ManageCategoryUiState()

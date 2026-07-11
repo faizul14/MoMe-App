@@ -7,6 +7,7 @@ import com.faezolmp.momeapp.core.domain.model.Transaction
 import com.faezolmp.momeapp.core.domain.model.TransactionSource
 import com.faezolmp.momeapp.core.domain.usecase.CategoryUseCase
 import com.faezolmp.momeapp.core.domain.usecase.TransactionUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -44,7 +46,7 @@ class DetailViewModel(
                 }
             }
         }
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = TransactionDetailUiState()
