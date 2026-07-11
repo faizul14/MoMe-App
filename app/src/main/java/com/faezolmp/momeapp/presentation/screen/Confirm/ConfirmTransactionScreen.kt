@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.faezolmp.momeapp.core.domain.model.TransactionSource
+import com.faezolmp.momeapp.presentation.ui.RupiahVisualTransformation
 import com.faezolmp.momeapp.presentation.ui.components.MomeCard
 import com.faezolmp.momeapp.presentation.ui.components.PrimaryButton
 import com.faezolmp.momeapp.presentation.ui.theme.BrandBackground
@@ -163,6 +164,7 @@ private fun AmountCard(amountText: String, onAmountChange: (String) -> Unit) {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     textStyle = TextStyle(color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold),
                     cursorBrush = SolidColor(BrandNavy),
+                    visualTransformation = RupiahVisualTransformation(),
                     modifier = Modifier.fillMaxWidth()
                 )
             }

@@ -55,6 +55,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.faezolmp.momeapp.presentation.ui.RupiahVisualTransformation
 import com.faezolmp.momeapp.presentation.ui.components.BottomTab
 import com.faezolmp.momeapp.presentation.ui.components.MomeBottomBar
 import com.faezolmp.momeapp.presentation.ui.components.MomeCard
@@ -284,6 +285,7 @@ private fun LimitCard(amountText: String, onAmountChange: (String) -> Unit) {
                     fontWeight = FontWeight.Bold
                 ),
                 cursorBrush = SolidColor(BrandNavy),
+                visualTransformation = RupiahVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
