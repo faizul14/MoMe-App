@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -27,6 +28,14 @@ import com.faezolmp.momeapp.presentation.screen.Scan.ScanScreen
 import com.faezolmp.momeapp.presentation.screen.Settings.SettingsScreen
 import com.faezolmp.momeapp.presentation.screen.Statistics.StatisticsScreen
 import org.koin.androidx.compose.koinViewModel
+
+private fun NavHostController.navigateTopLevel(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
 
 @Composable
 fun MomeNavHost(
@@ -67,13 +76,13 @@ fun MomeNavHost(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             DashboardScreen(
                 state = state,
-                onSeeAllActivities = { navController.navigate(MomeDestination.History.route) },
+                onSeeAllActivities = { navController.navigateTopLevel(MomeDestination.History.route) },
                 onActivityClick = { id -> navController.navigate(MomeDestination.Detail.createRoute(id)) },
                 onManageCategories = { navController.navigate(MomeDestination.ManageCategory.route) },
-                onHistory = { navController.navigate(MomeDestination.History.route) },
-                onScan = { navController.navigate(MomeDestination.Scan.route) },
-                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.Settings.route) }
+                onHistory = { navController.navigateTopLevel(MomeDestination.History.route) },
+                onScan = { navController.navigateTopLevel(MomeDestination.Scan.route) },
+                onAdd = { navController.navigateTopLevel(MomeDestination.AddManual.route) },
+                onManage = { navController.navigateTopLevel(MomeDestination.Settings.route) }
             )
         }
 
@@ -85,30 +94,30 @@ fun MomeNavHost(
                         popUpTo(MomeDestination.Home.route) { inclusive = true }
                     }
                 },
-                onDashboard = { navController.navigate(MomeDestination.Home.route) },
-                onHistory = { navController.navigate(MomeDestination.History.route) },
-                onScan = { navController.navigate(MomeDestination.Scan.route) },
-                onManage = { navController.navigate(MomeDestination.Settings.route) }
+                onDashboard = { navController.navigateTopLevel(MomeDestination.Home.route) },
+                onHistory = { navController.navigateTopLevel(MomeDestination.History.route) },
+                onScan = { navController.navigateTopLevel(MomeDestination.Scan.route) },
+                onManage = { navController.navigateTopLevel(MomeDestination.Settings.route) }
             )
         }
 
         composable(MomeDestination.ManageBudget.route) {
             ManageBudgetScreen(
-                onDashboard = { navController.navigate(MomeDestination.Home.route) },
-                onHistory = { navController.navigate(MomeDestination.History.route) },
-                onScan = { navController.navigate(MomeDestination.Scan.route) },
-                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.Settings.route) }
+                onDashboard = { navController.navigateTopLevel(MomeDestination.Home.route) },
+                onHistory = { navController.navigateTopLevel(MomeDestination.History.route) },
+                onScan = { navController.navigateTopLevel(MomeDestination.Scan.route) },
+                onAdd = { navController.navigateTopLevel(MomeDestination.AddManual.route) },
+                onManage = { navController.navigateTopLevel(MomeDestination.Settings.route) }
             )
         }
 
         composable(MomeDestination.ManageCategory.route) {
             ManageCategoryScreen(
-                onDashboard = { navController.navigate(MomeDestination.Home.route) },
-                onHistory = { navController.navigate(MomeDestination.History.route) },
-                onScan = { navController.navigate(MomeDestination.Scan.route) },
-                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.Settings.route) }
+                onDashboard = { navController.navigateTopLevel(MomeDestination.Home.route) },
+                onHistory = { navController.navigateTopLevel(MomeDestination.History.route) },
+                onScan = { navController.navigateTopLevel(MomeDestination.Scan.route) },
+                onAdd = { navController.navigateTopLevel(MomeDestination.AddManual.route) },
+                onManage = { navController.navigateTopLevel(MomeDestination.Settings.route) }
             )
         }
 
@@ -120,10 +129,10 @@ fun MomeNavHost(
                         MomeDestination.Confirm.createRoute(amount, path, TransactionSource.SCAN.name)
                     )
                 },
-                onDashboard = { navController.navigate(MomeDestination.Home.route) },
-                onHistory = { navController.navigate(MomeDestination.History.route) },
-                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.Settings.route) }
+                onDashboard = { navController.navigateTopLevel(MomeDestination.Home.route) },
+                onHistory = { navController.navigateTopLevel(MomeDestination.History.route) },
+                onAdd = { navController.navigateTopLevel(MomeDestination.AddManual.route) },
+                onManage = { navController.navigateTopLevel(MomeDestination.Settings.route) }
             )
         }
 
@@ -172,10 +181,10 @@ fun MomeNavHost(
                 onOpenDetail = { id ->
                     navController.navigate(MomeDestination.Detail.createRoute(id))
                 },
-                onDashboard = { navController.navigate(MomeDestination.Home.route) },
-                onScan = { navController.navigate(MomeDestination.Scan.route) },
-                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.Settings.route) }
+                onDashboard = { navController.navigateTopLevel(MomeDestination.Home.route) },
+                onScan = { navController.navigateTopLevel(MomeDestination.Scan.route) },
+                onAdd = { navController.navigateTopLevel(MomeDestination.AddManual.route) },
+                onManage = { navController.navigateTopLevel(MomeDestination.Settings.route) }
             )
         }
 
@@ -209,10 +218,10 @@ fun MomeNavHost(
         composable(MomeDestination.Settings.route) {
             SettingsScreen(
                 onCurrency = { navController.navigate(MomeDestination.ManageBudget.route) },
-                onDashboard = { navController.navigate(MomeDestination.Home.route) },
-                onHistory = { navController.navigate(MomeDestination.History.route) },
-                onScan = { navController.navigate(MomeDestination.Scan.route) },
-                onAdd = { navController.navigate(MomeDestination.AddManual.route) }
+                onDashboard = { navController.navigateTopLevel(MomeDestination.Home.route) },
+                onHistory = { navController.navigateTopLevel(MomeDestination.History.route) },
+                onScan = { navController.navigateTopLevel(MomeDestination.Scan.route) },
+                onAdd = { navController.navigateTopLevel(MomeDestination.AddManual.route) }
             )
         }
     }
