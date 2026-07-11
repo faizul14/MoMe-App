@@ -8,6 +8,8 @@ import com.faezolmp.momeapp.core.domain.usecase.TransactionInteractor
 import com.faezolmp.momeapp.core.domain.usecase.TransactionUseCase
 import com.faezolmp.momeapp.core.domain.usecase.UseCase
 import com.faezolmp.momeapp.core.domain.usecase.UseCaseIteractor
+import com.faezolmp.momeapp.core.notification.BudgetNotifier
+import org.koin.android.ext.koin.androidContext
 import com.faezolmp.momeapp.presentation.screen.AddManual.AddTransactionViewModel
 import com.faezolmp.momeapp.presentation.screen.Confirm.ConfirmViewModel
 import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardViewModel
@@ -23,12 +25,13 @@ val appModule = module {
     single<TransactionUseCase> { TransactionInteractor(get()) }
     single<CategoryUseCase> { CategoryInteractor(get()) }
     single<BudgetUseCase> { BudgetInteractor(get()) }
+    single { BudgetNotifier(androidContext(), get(), get()) }
 
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { HistoryViewModel(get(), get()) }
     viewModel { DetailViewModel(get(), get()) }
-    viewModel { ConfirmViewModel(get(), get()) }
-    viewModel { AddTransactionViewModel(get(), get()) }
+    viewModel { ConfirmViewModel(get(), get(), get()) }
+    viewModel { AddTransactionViewModel(get(), get(), get()) }
     viewModel { ManageCategoryViewModel(get(), get()) }
     viewModel { BudgetViewModel(get()) }
 }

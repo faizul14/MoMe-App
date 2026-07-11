@@ -7,6 +7,7 @@ import com.faezolmp.momeapp.core.domain.model.Transaction
 import com.faezolmp.momeapp.core.domain.model.TransactionSource
 import com.faezolmp.momeapp.core.domain.usecase.CategoryUseCase
 import com.faezolmp.momeapp.core.domain.usecase.TransactionUseCase
+import com.faezolmp.momeapp.core.notification.BudgetNotifier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,8 @@ data class AddTransactionUiState(
 
 class AddTransactionViewModel(
     private val categoryUseCase: CategoryUseCase,
-    private val transactionUseCase: TransactionUseCase
+    private val transactionUseCase: TransactionUseCase,
+    private val budgetNotifier: BudgetNotifier
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddTransactionUiState())
@@ -77,6 +79,7 @@ class AddTransactionViewModel(
                     isIncome = current.isIncome
                 )
             )
+            budgetNotifier.checkAfterInsert()
             _uiState.update { it.copy(saved = true) }
         }
     }

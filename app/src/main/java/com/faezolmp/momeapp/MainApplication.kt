@@ -3,6 +3,7 @@ package com.faezolmp.momeapp
 import android.app.Application
 import com.faezolmp.momeapp.core.di.databaseModule
 import com.faezolmp.momeapp.core.di.repositoryModule
+import com.faezolmp.momeapp.core.notification.ReminderScheduler
 import com.faezolmp.momeapp.presentation.di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -22,5 +23,6 @@ class MainApplication(): Application() {
                 )
             )
         }
+        ReminderScheduler.schedule(this)
     }
 }

@@ -112,4 +112,7 @@ dependencies {
 //  coil (tampilkan gambar bukti)
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+//  workmanager (reminder terjadwal)
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
+
 }
