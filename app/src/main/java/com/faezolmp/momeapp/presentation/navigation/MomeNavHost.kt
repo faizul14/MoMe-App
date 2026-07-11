@@ -14,6 +14,7 @@ import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardScreen
 import com.faezolmp.momeapp.presentation.screen.Dashboard.sampleDashboardState
 import com.faezolmp.momeapp.presentation.screen.Detail.TransactionDetailScreen
 import com.faezolmp.momeapp.presentation.screen.History.HistoryScreen
+import com.faezolmp.momeapp.presentation.screen.Manage.ManageBudgetScreen
 import com.faezolmp.momeapp.presentation.screen.Onboarding.OnboardingScreen
 import com.faezolmp.momeapp.presentation.screen.Scan.ScanScreen
 import com.faezolmp.momeapp.presentation.screen.Settings.SettingsScreen
@@ -47,12 +48,32 @@ fun MomeNavHost(
                 onHistory = { navController.navigate(MomeDestination.History.route) },
                 onScan = { navController.navigate(MomeDestination.Scan.route) },
                 onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.Settings.route) }
+                onManage = { navController.navigate(MomeDestination.ManageBudget.route) }
             )
         }
 
         composable(MomeDestination.AddManual.route) {
-            AddManualScreen(onBack = { navController.popBackStack() })
+            AddManualScreen(
+                onBack = { navController.popBackStack() },
+                onSave = {
+                    navController.navigate(MomeDestination.Home.route) {
+                        popUpTo(MomeDestination.Home.route) { inclusive = true }
+                    }
+                },
+                onDashboard = { navController.navigate(MomeDestination.Home.route) },
+                onHistory = { navController.navigate(MomeDestination.History.route) },
+                onScan = { navController.navigate(MomeDestination.Scan.route) },
+                onManage = { navController.navigate(MomeDestination.ManageBudget.route) }
+            )
+        }
+
+        composable(MomeDestination.ManageBudget.route) {
+            ManageBudgetScreen(
+                onDashboard = { navController.navigate(MomeDestination.Home.route) },
+                onHistory = { navController.navigate(MomeDestination.History.route) },
+                onScan = { navController.navigate(MomeDestination.Scan.route) },
+                onAdd = { navController.navigate(MomeDestination.AddManual.route) }
+            )
         }
 
         composable(MomeDestination.Scan.route) {

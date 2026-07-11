@@ -9,6 +9,7 @@ sealed class MomeDestination(val route: String) {
     object History : MomeDestination("history")
     object Statistics : MomeDestination("statistics")
     object Settings : MomeDestination("settings")
+    object ManageBudget : MomeDestination("manage_budget")
 
     object Detail : MomeDestination("detail/{transactionId}") {
         const val ARG_TRANSACTION_ID = "transactionId"
