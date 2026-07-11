@@ -15,6 +15,7 @@ import com.faezolmp.momeapp.presentation.screen.Dashboard.sampleDashboardState
 import com.faezolmp.momeapp.presentation.screen.Detail.TransactionDetailScreen
 import com.faezolmp.momeapp.presentation.screen.History.HistoryScreen
 import com.faezolmp.momeapp.presentation.screen.Manage.ManageBudgetScreen
+import com.faezolmp.momeapp.presentation.screen.Manage.ManageCategoryScreen
 import com.faezolmp.momeapp.presentation.screen.Onboarding.OnboardingScreen
 import com.faezolmp.momeapp.presentation.screen.Scan.ScanScreen
 import com.faezolmp.momeapp.presentation.screen.Settings.SettingsScreen
@@ -45,10 +46,11 @@ fun MomeNavHost(
                 state = sampleDashboardState(),
                 onSeeAllActivities = { navController.navigate(MomeDestination.History.route) },
                 onActivityClick = { navController.navigate(MomeDestination.Detail.createRoute(1L)) },
+                onManageCategories = { navController.navigate(MomeDestination.ManageCategory.route) },
                 onHistory = { navController.navigate(MomeDestination.History.route) },
                 onScan = { navController.navigate(MomeDestination.Scan.route) },
                 onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.ManageBudget.route) }
+                onManage = { navController.navigate(MomeDestination.Settings.route) }
             )
         }
 
@@ -63,7 +65,7 @@ fun MomeNavHost(
                 onDashboard = { navController.navigate(MomeDestination.Home.route) },
                 onHistory = { navController.navigate(MomeDestination.History.route) },
                 onScan = { navController.navigate(MomeDestination.Scan.route) },
-                onManage = { navController.navigate(MomeDestination.ManageBudget.route) }
+                onManage = { navController.navigate(MomeDestination.Settings.route) }
             )
         }
 
@@ -72,7 +74,18 @@ fun MomeNavHost(
                 onDashboard = { navController.navigate(MomeDestination.Home.route) },
                 onHistory = { navController.navigate(MomeDestination.History.route) },
                 onScan = { navController.navigate(MomeDestination.Scan.route) },
-                onAdd = { navController.navigate(MomeDestination.AddManual.route) }
+                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
+                onManage = { navController.navigate(MomeDestination.Settings.route) }
+            )
+        }
+
+        composable(MomeDestination.ManageCategory.route) {
+            ManageCategoryScreen(
+                onDashboard = { navController.navigate(MomeDestination.Home.route) },
+                onHistory = { navController.navigate(MomeDestination.History.route) },
+                onScan = { navController.navigate(MomeDestination.Scan.route) },
+                onAdd = { navController.navigate(MomeDestination.AddManual.route) },
+                onManage = { navController.navigate(MomeDestination.Settings.route) }
             )
         }
 
@@ -82,7 +95,7 @@ fun MomeNavHost(
                 onDashboard = { navController.navigate(MomeDestination.Home.route) },
                 onHistory = { navController.navigate(MomeDestination.History.route) },
                 onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.ManageBudget.route) }
+                onManage = { navController.navigate(MomeDestination.Settings.route) }
             )
         }
 
@@ -105,7 +118,7 @@ fun MomeNavHost(
                 onDashboard = { navController.navigate(MomeDestination.Home.route) },
                 onScan = { navController.navigate(MomeDestination.Scan.route) },
                 onAdd = { navController.navigate(MomeDestination.AddManual.route) },
-                onManage = { navController.navigate(MomeDestination.ManageBudget.route) }
+                onManage = { navController.navigate(MomeDestination.Settings.route) }
             )
         }
 
@@ -130,7 +143,13 @@ fun MomeNavHost(
         }
 
         composable(MomeDestination.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                onCurrency = { navController.navigate(MomeDestination.ManageBudget.route) },
+                onDashboard = { navController.navigate(MomeDestination.Home.route) },
+                onHistory = { navController.navigate(MomeDestination.History.route) },
+                onScan = { navController.navigate(MomeDestination.Scan.route) },
+                onAdd = { navController.navigate(MomeDestination.AddManual.route) }
+            )
         }
     }
 }

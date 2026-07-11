@@ -75,7 +75,8 @@ fun ManageBudgetScreen(
     onDashboard: () -> Unit = {},
     onHistory: () -> Unit = {},
     onScan: () -> Unit = {},
-    onAdd: () -> Unit = {}
+    onAdd: () -> Unit = {},
+    onManage: () -> Unit = {}
 ) {
     var overLimitEnabled by remember { mutableStateOf(true) }
     var eveningReminderEnabled by remember { mutableStateOf(false) }
@@ -91,7 +92,7 @@ fun ManageBudgetScreen(
                 onHistory = onHistory,
                 onScan = onScan,
                 onAdd = onAdd,
-                onManage = {}
+                onManage = onManage
             )
         }
     ) { innerPadding ->

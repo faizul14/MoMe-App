@@ -76,6 +76,7 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     onSeeAllActivities: () -> Unit = {},
     onActivityClick: (ActivityUi) -> Unit = {},
+    onManageCategories: () -> Unit = {},
     onNotifications: () -> Unit = {},
     onDashboard: () -> Unit = {},
     onHistory: () -> Unit = {},
@@ -111,7 +112,7 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(20.dp))
             BudgetCard(state = state)
             Spacer(modifier = Modifier.height(24.dp))
-            CategorySection(state = state)
+            CategorySection(state = state, onCategoryClick = onManageCategories)
             Spacer(modifier = Modifier.height(24.dp))
             SectionHeader(
                 title = "Aktivitas Terakhir",
@@ -263,7 +264,7 @@ private fun BudgetCard(state: DashboardUiState) {
 }
 
 @Composable
-private fun CategorySection(state: DashboardUiState) {
+private fun CategorySection(state: DashboardUiState, onCategoryClick: () -> Unit) {
     state.mainCategory?.let { main ->
         val remaining = main.remaining ?: 0L
         val denominator = main.spent + remaining
@@ -275,7 +276,8 @@ private fun CategorySection(state: DashboardUiState) {
             name = main.name,
             amountText = formatRupiah(main.spent, state.currencySymbol),
             progress = progress,
-            remainingText = "Sisa: ${formatCompact(remaining, state.currencySymbol)}"
+            remainingText = "Sisa: ${formatCompact(remaining, state.currencySymbol)}",
+            modifier = Modifier.clickable { onCategoryClick() }
         )
         Spacer(modifier = Modifier.height(16.dp))
     }
@@ -291,7 +293,9 @@ private fun CategorySection(state: DashboardUiState) {
                 name = category.name,
                 amountText = formatRupiah(category.spent, state.currencySymbol),
                 amountColor = if (category.visual == CategoryVisual.FUN) FunAmountText else TextPrimary,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onCategoryClick() }
             )
         }
     }
