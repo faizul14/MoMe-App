@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -27,12 +29,15 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,49 +47,73 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.faezolmp.momeapp.presentation.ui.RupiahVisualTransformation
 import com.faezolmp.momeapp.presentation.ui.components.BottomTab
 import com.faezolmp.momeapp.presentation.ui.components.MomeBottomBar
 import com.faezolmp.momeapp.presentation.ui.components.MomeCard
 import com.faezolmp.momeapp.presentation.ui.components.PrimaryButton
-import com.faezolmp.momeapp.presentation.ui.components.ScreenLabel
 import com.faezolmp.momeapp.presentation.ui.theme.BrandBackground
 import com.faezolmp.momeapp.presentation.ui.theme.BrandNavy
 import com.faezolmp.momeapp.presentation.ui.theme.BrandRingTrack
-import com.faezolmp.momeapp.presentation.ui.theme.BrandSurface
 import com.faezolmp.momeapp.presentation.ui.theme.FieldBg
 import com.faezolmp.momeapp.presentation.ui.theme.FoodIconBg
 import com.faezolmp.momeapp.presentation.ui.theme.FoodIconTint
 import com.faezolmp.momeapp.presentation.ui.theme.NavyCardLabel
-import com.faezolmp.momeapp.presentation.ui.theme.MomeAppTheme
 import com.faezolmp.momeapp.presentation.ui.theme.PillBlueBg
 import com.faezolmp.momeapp.presentation.ui.theme.TextPrimary
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
 import com.faezolmp.momeapp.presentation.ui.theme.WarnBg
 import com.faezolmp.momeapp.presentation.ui.theme.WarnTint
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageBudgetScreen(
     modifier: Modifier = Modifier,
-    onUpdate: () -> Unit = {},
     onDashboard: () -> Unit = {},
     onHistory: () -> Unit = {},
     onScan: () -> Unit = {},
     onAdd: () -> Unit = {},
     onManage: () -> Unit = {}
 ) {
-    var overLimitEnabled by remember { mutableStateOf(true) }
-    var eveningReminderEnabled by remember { mutableStateOf(false) }
+    val viewModel: BudgetViewModel = koinViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    var amountText by remember { mutableStateOf("") }
+    var overLimit by remember { mutableStateOf(true) }
+    var eveningReminder by remember { mutableStateOf(false) }
     var threshold by remember { mutableFloatStateOf(0.8f) }
+    var initialized by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.loaded) {
+        if (state.loaded && !initialized) {
+            amountText = state.amount.toString()
+            overLimit = state.overLimitAlert
+            eveningReminder = state.eveningReminder
+            threshold = state.warningThreshold
+            initialized = true
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.saved.collect {
+            snackbarHostState.showSnackbar("Batas berhasil diperbarui")
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = BrandBackground,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             MomeBottomBar(
                 activeTab = BottomTab.MANAGE,
@@ -103,14 +132,12 @@ fun ManageBudgetScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
-//            ScreenLabel(text = "Manajemen Batas Harian")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Header()
             Spacer(modifier = Modifier.height(20.dp))
             HeroCard()
             Spacer(modifier = Modifier.height(16.dp))
-            LimitCard()
+            LimitCard(amountText = amountText, onAmountChange = { amountText = it.filter { c -> c.isDigit() } })
             Spacer(modifier = Modifier.height(22.dp))
             Text(
                 text = "PENGINGAT & NOTIFIKASI",
@@ -126,8 +153,8 @@ fun ManageBudgetScreen(
                 iconTint = WarnTint,
                 title = "Notifikasi Jika Melebihi Batas",
                 subtitle = "Peringatan instan saat transaksi",
-                checked = overLimitEnabled,
-                onCheckedChange = { overLimitEnabled = it }
+                checked = overLimit,
+                onCheckedChange = { overLimit = it }
             )
             Spacer(modifier = Modifier.height(12.dp))
             ReminderCard(
@@ -136,18 +163,22 @@ fun ManageBudgetScreen(
                 iconTint = FoodIconTint,
                 title = "Notifikasi Sisa Budget Sore Hari",
                 subtitle = "Update rutin setiap jam 17:00",
-                checked = eveningReminderEnabled,
-                onCheckedChange = { eveningReminderEnabled = it }
+                checked = eveningReminder,
+                onCheckedChange = { eveningReminder = it }
             )
             Spacer(modifier = Modifier.height(22.dp))
-            ThresholdCard(
-                threshold = threshold,
-                onThresholdChange = { threshold = it }
-            )
+            ThresholdCard(threshold = threshold, onThresholdChange = { threshold = it })
             Spacer(modifier = Modifier.height(24.dp))
             PrimaryButton(
                 text = "Update Batas",
-                onClick = onUpdate,
+                onClick = {
+                    viewModel.save(
+                        amount = amountText.toLongOrNull() ?: 0L,
+                        overLimitAlert = overLimit,
+                        eveningReminder = eveningReminder,
+                        warningThreshold = threshold
+                    )
+                },
                 icon = Icons.Filled.SwapHoriz,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -214,7 +245,7 @@ private fun HeroCard() {
 }
 
 @Composable
-private fun LimitCard() {
+private fun LimitCard(amountText: String, onAmountChange: (String) -> Unit) {
     MomeCard(padding = 18.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -233,23 +264,30 @@ private fun LimitCard() {
             )
         }
         Spacer(modifier = Modifier.height(14.dp))
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
                 .background(FieldBg)
-                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Rp", color = TextSecondary, fontSize = 16.sp)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "500000",
+            Text(text = "Rp", color = TextSecondary, fontSize = 16.sp)
+            Spacer(modifier = Modifier.width(8.dp))
+            BasicTextField(
+                value = amountText,
+                onValueChange = onAmountChange,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                textStyle = TextStyle(
                     color = TextPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
-                )
-            }
+                ),
+                cursorBrush = SolidColor(BrandNavy),
+                visualTransformation = RupiahVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
@@ -364,13 +402,5 @@ private fun ThresholdCard(threshold: Float, onThresholdChange: (Float) -> Unit) 
             color = TextSecondary,
             fontSize = 12.sp
         )
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun ManageBudgetScreenPreview() {
-    MomeAppTheme {
-        ManageBudgetScreen()
     }
 }

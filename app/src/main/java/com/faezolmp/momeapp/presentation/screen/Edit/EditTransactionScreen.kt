@@ -1,4 +1,4 @@
-package com.faezolmp.momeapp.presentation.screen.Confirm
+package com.faezolmp.momeapp.presentation.screen.Edit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -34,42 +33,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import com.faezolmp.momeapp.core.domain.model.TransactionSource
 import com.faezolmp.momeapp.presentation.ui.RupiahVisualTransformation
 import com.faezolmp.momeapp.presentation.ui.components.MomeCard
 import com.faezolmp.momeapp.presentation.ui.components.PrimaryButton
 import com.faezolmp.momeapp.presentation.ui.theme.BrandBackground
 import com.faezolmp.momeapp.presentation.ui.theme.BrandNavy
-import com.faezolmp.momeapp.presentation.ui.theme.FieldBg
 import com.faezolmp.momeapp.presentation.ui.theme.TextMuted
 import com.faezolmp.momeapp.presentation.ui.theme.TextPrimary
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
-import java.io.File
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ConfirmTransactionScreen(
-    amount: Long,
-    attachmentPath: String?,
-    source: TransactionSource,
+fun EditTransactionScreen(
+    transactionId: Long,
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
     onSaved: () -> Unit = {}
 ) {
-    val viewModel: ConfirmViewModel = koinViewModel()
+    val viewModel: EditTransactionViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) { viewModel.prefill(amount, attachmentPath, source) }
+    LaunchedEffect(transactionId) { viewModel.load(transactionId) }
     LaunchedEffect(state.saved) { if (state.saved) onSaved() }
 
     Column(
@@ -82,10 +73,6 @@ fun ConfirmTransactionScreen(
         Spacer(modifier = Modifier.height(12.dp))
         Header(onBack = onBack)
         Spacer(modifier = Modifier.height(20.dp))
-        if (state.attachmentPath != null) {
-            AttachmentPreview(path = state.attachmentPath!!)
-            Spacer(modifier = Modifier.height(14.dp))
-        }
         AmountCard(amountText = state.amountText, onAmountChange = viewModel::onAmountChange)
         Spacer(modifier = Modifier.height(14.dp))
         CategoryField(
@@ -97,7 +84,7 @@ fun ConfirmTransactionScreen(
         NoteCard(note = state.note, onNoteChange = viewModel::onNoteChange)
         Spacer(modifier = Modifier.height(24.dp))
         PrimaryButton(
-            text = "Simpan Transaksi",
+            text = "Simpan Perubahan",
             onClick = viewModel::save,
             icon = Icons.Filled.CheckCircle,
             iconAtEnd = true,
@@ -123,26 +110,12 @@ private fun Header(onBack: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = "Konfirmasi Transaksi",
+            text = "Edit Transaksi",
             color = BrandNavy,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
     }
-}
-
-@Composable
-private fun AttachmentPreview(path: String) {
-    AsyncImage(
-        model = File(path),
-        contentDescription = "Bukti transaksi",
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(FieldBg)
-    )
 }
 
 @Composable

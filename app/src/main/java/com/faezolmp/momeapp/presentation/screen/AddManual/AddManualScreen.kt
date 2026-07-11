@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,48 +29,65 @@ import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.faezolmp.momeapp.presentation.ui.RupiahVisualTransformation
 import com.faezolmp.momeapp.presentation.ui.components.BottomTab
 import com.faezolmp.momeapp.presentation.ui.components.MomeBottomBar
 import com.faezolmp.momeapp.presentation.ui.components.MomeCard
 import com.faezolmp.momeapp.presentation.ui.components.PrimaryButton
-import com.faezolmp.momeapp.presentation.ui.components.ScreenLabel
 import com.faezolmp.momeapp.presentation.ui.theme.BrandBackground
 import com.faezolmp.momeapp.presentation.ui.theme.BrandNavy
 import com.faezolmp.momeapp.presentation.ui.theme.DashedBorder
-import com.faezolmp.momeapp.presentation.ui.theme.MomeAppTheme
 import com.faezolmp.momeapp.presentation.ui.theme.PillBlueBg
 import com.faezolmp.momeapp.presentation.ui.theme.TextMuted
 import com.faezolmp.momeapp.presentation.ui.theme.TextPrimary
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
 import com.faezolmp.momeapp.presentation.ui.theme.UploadCardBg
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddManualScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
-    onSave: () -> Unit = {},
+    onSaved: () -> Unit = {},
     onDashboard: () -> Unit = {},
     onHistory: () -> Unit = {},
     onScan: () -> Unit = {},
     onManage: () -> Unit = {}
 ) {
+    val viewModel: AddTransactionViewModel = koinViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.saved) {
+        if (state.saved) onSaved()
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = BrandBackground,
@@ -90,28 +109,31 @@ fun AddManualScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
-//            ScreenLabel(text = "Tambah Transaksi")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Header(onBack = onBack)
             Spacer(modifier = Modifier.height(20.dp))
-            AmountCard()
+            AmountCard(amountText = state.amountText, onAmountChange = viewModel::onAmountChange)
             Spacer(modifier = Modifier.height(14.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                CategoryField(modifier = Modifier.weight(1f))
+                CategoryField(
+                    categoryName = state.categories.find { it.id == state.selectedCategoryId }?.name ?: "Pilih...",
+                    categories = state.categories.map { it.id to it.name },
+                    onSelect = viewModel::onCategorySelected,
+                    modifier = Modifier.weight(1f)
+                )
                 DateField(modifier = Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.height(14.dp))
-            NoteCard()
+            NoteCard(note = state.note, onNoteChange = viewModel::onNoteChange)
             Spacer(modifier = Modifier.height(14.dp))
             UploadCard()
             Spacer(modifier = Modifier.height(20.dp))
             PrimaryButton(
                 text = "Simpan Transaksi",
-                onClick = onSave,
+                onClick = viewModel::save,
                 icon = Icons.Filled.CheckCircle,
                 iconAtEnd = true,
                 modifier = Modifier.fillMaxWidth()
@@ -168,40 +190,68 @@ private fun Header(onBack: () -> Unit) {
 }
 
 @Composable
-private fun AmountCard() {
+private fun AmountCard(amountText: String, onAmountChange: (String) -> Unit) {
     MomeCard(padding = 18.dp) {
         Text(text = "Jumlah Nominal", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(6.dp))
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text = "Rp",
-                color = BrandNavy,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Rp", color = BrandNavy, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(6.dp))
-            Text(text = "0", color = TextMuted, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Box(modifier = Modifier.weight(1f)) {
+                if (amountText.isEmpty()) {
+                    Text(text = "0", color = TextMuted, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                }
+                BasicTextField(
+                    value = amountText,
+                    onValueChange = onAmountChange,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    textStyle = TextStyle(color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    cursorBrush = SolidColor(BrandNavy),
+                    visualTransformation = RupiahVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CategoryField(modifier: Modifier = Modifier) {
-    MomeCard(modifier = modifier) {
-        Text(text = "Kategori", color = TextSecondary, fontSize = 13.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Pilih...", color = TextMuted, fontSize = 15.sp)
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowDown,
-                contentDescription = null,
-                tint = TextSecondary,
-                modifier = Modifier.size(20.dp)
-            )
+private fun CategoryField(
+    categoryName: String,
+    categories: List<Pair<Long, String>>,
+    onSelect: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = modifier) {
+        MomeCard(modifier = Modifier.clickable { expanded = true }) {
+            Text(text = "Kategori", color = TextSecondary, fontSize = 13.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = categoryName, color = TextPrimary, fontSize = 15.sp)
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = TextSecondary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            categories.forEach { (id, name) ->
+                DropdownMenuItem(
+                    text = { Text(text = name) },
+                    onClick = {
+                        onSelect(id)
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }
@@ -228,15 +278,26 @@ private fun DateField(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun NoteCard() {
+private fun NoteCard(note: String, onNoteChange: (String) -> Unit) {
     MomeCard(padding = 18.dp) {
         Text(text = "Catatan (Opsional)", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Tulis keterangan pengeluaran di sini...",
-            color = TextMuted,
-            fontSize = 14.sp
-        )
+        Box {
+            if (note.isEmpty()) {
+                Text(
+                    text = "Tulis keterangan pengeluaran di sini...",
+                    color = TextMuted,
+                    fontSize = 14.sp
+                )
+            }
+            BasicTextField(
+                value = note,
+                onValueChange = onNoteChange,
+                textStyle = TextStyle(color = TextPrimary, fontSize = 14.sp),
+                cursorBrush = SolidColor(BrandNavy),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
@@ -275,18 +336,9 @@ private fun UploadCard() {
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "Upload Bukti Transaksi",
-            color = TextPrimary,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = "Upload Bukti Transaksi", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = "Lampirkan struk atau bukti transfer",
-            color = TextSecondary,
-            fontSize = 12.sp
-        )
+        Text(text = "Lampirkan struk atau bukti transfer", color = TextSecondary, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -305,13 +357,5 @@ private fun UploadCard() {
                 modifier = Modifier.weight(1f)
             )
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun AddManualScreenPreview() {
-    MomeAppTheme {
-        AddManualScreen()
     }
 }

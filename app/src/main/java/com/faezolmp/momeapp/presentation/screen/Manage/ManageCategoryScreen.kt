@@ -3,6 +3,7 @@ package com.faezolmp.momeapp.presentation.screen.Manage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,89 +21,86 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.faezolmp.momeapp.presentation.ui.CATEGORY_ICON_KEYS
+import com.faezolmp.momeapp.presentation.ui.categoryBackgroundOf
+import com.faezolmp.momeapp.presentation.ui.categoryColorOf
+import com.faezolmp.momeapp.presentation.ui.categoryIconOf
 import com.faezolmp.momeapp.presentation.ui.components.BottomTab
 import com.faezolmp.momeapp.presentation.ui.components.MomeBottomBar
-import com.faezolmp.momeapp.presentation.ui.components.ScreenLabel
 import com.faezolmp.momeapp.presentation.ui.components.SearchField
 import com.faezolmp.momeapp.presentation.ui.theme.BrandBackground
 import com.faezolmp.momeapp.presentation.ui.theme.BrandNavy
 import com.faezolmp.momeapp.presentation.ui.theme.BrandRingTrack
 import com.faezolmp.momeapp.presentation.ui.theme.BrandSurface
-import com.faezolmp.momeapp.presentation.ui.theme.FoodIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.FoodIconTint
-import com.faezolmp.momeapp.presentation.ui.theme.MomeAppTheme
-import com.faezolmp.momeapp.presentation.ui.theme.OrangeIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.OrangeIconTint
-import com.faezolmp.momeapp.presentation.ui.theme.PillBlueBg
-import com.faezolmp.momeapp.presentation.ui.theme.PinkIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.PinkIconTint
-import com.faezolmp.momeapp.presentation.ui.theme.PurpleIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.PurpleIconTint
 import com.faezolmp.momeapp.presentation.ui.theme.TextMuted
 import com.faezolmp.momeapp.presentation.ui.theme.TextPrimary
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
-import com.faezolmp.momeapp.presentation.ui.theme.TransportIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.TransportIconTint
+import androidx.compose.ui.graphics.Color
+import org.koin.androidx.compose.koinViewModel
 
-private enum class ManageCategoryVisual { FOOD, TRANSPORT, FUN, SHOPPING, HEALTH }
-
-private data class ManageCategoryUi(
-    val name: String,
-    val transactionInfo: String,
-    val visual: ManageCategoryVisual
-)
-
-private fun sampleManageCategories(): List<ManageCategoryUi> = listOf(
-    ManageCategoryUi("Makan & Minum", "12 transaksi bulan ini", ManageCategoryVisual.FOOD),
-    ManageCategoryUi("Transportasi", "8 transaksi bulan ini", ManageCategoryVisual.TRANSPORT),
-    ManageCategoryUi("Hiburan", "4 transaksi bulan ini", ManageCategoryVisual.FUN),
-    ManageCategoryUi("Belanja", "15 transaksi bulan ini", ManageCategoryVisual.SHOPPING),
-    ManageCategoryUi("Kesehatan", "2 transaksi bulan ini", ManageCategoryVisual.HEALTH)
+private val iconColorMap = mapOf(
+    "food" to "#E8912E",
+    "transport" to "#4B69C6",
+    "fun" to "#7A5AF8",
+    "shopping" to "#DB4E96",
+    "health" to "#2FB673",
+    "income" to "#2FB673"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageCategoryScreen(
     modifier: Modifier = Modifier,
-    onAddCategory: () -> Unit = {},
-    onEditCategory: (String) -> Unit = {},
     onDashboard: () -> Unit = {},
     onHistory: () -> Unit = {},
     onScan: () -> Unit = {},
     onAdd: () -> Unit = {},
     onManage: () -> Unit = {}
 ) {
-    val categories = sampleManageCategories()
+    val viewModel: ManageCategoryViewModel = koinViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AddCategoryDialog(
+            onDismiss = { showDialog = false },
+            onConfirm = { name, iconKey ->
+                viewModel.addCategory(name, iconKey, iconColorMap[iconKey] ?: "#1B2559")
+                showDialog = false
+            }
+        )
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = BrandBackground,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onAddCategory,
+                onClick = { showDialog = true },
                 containerColor = BrandNavy,
                 contentColor = Color.White
             ) {
@@ -127,9 +125,7 @@ fun ManageCategoryScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
-            ScreenLabel(text = "Manajemen Kategori")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Header()
             Spacer(modifier = Modifier.height(18.dp))
             Text(
@@ -147,12 +143,12 @@ fun ManageCategoryScreen(
             Spacer(modifier = Modifier.height(16.dp))
             SearchField(placeholder = "Cari kategori...")
             Spacer(modifier = Modifier.height(16.dp))
-            categories.forEach { category ->
-                CategoryManageRow(category = category, onEdit = { onEditCategory(category.name) })
+            state.categories.forEach { category ->
+                CategoryManageRow(category = category)
                 Spacer(modifier = Modifier.height(12.dp))
             }
             Spacer(modifier = Modifier.height(4.dp))
-            AddCategoryButton(onClick = onAddCategory)
+            AddCategoryButton(onClick = { showDialog = true })
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -168,7 +164,7 @@ private fun Header() {
             modifier = Modifier
                 .size(46.dp)
                 .clip(CircleShape)
-                .background(PillBlueBg),
+                .background(com.faezolmp.momeapp.presentation.ui.theme.PillBlueBg),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -196,7 +192,7 @@ private fun Header() {
 }
 
 @Composable
-private fun CategoryManageRow(category: ManageCategoryUi, onEdit: () -> Unit) {
+private fun CategoryManageRow(category: ManageCategoryItemUi) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,13 +205,13 @@ private fun CategoryManageRow(category: ManageCategoryUi, onEdit: () -> Unit) {
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(visualBackground(category.visual)),
+                .background(categoryBackgroundOf(category.colorHex)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = visualIcon(category.visual),
+                imageVector = categoryIconOf(category.iconKey),
                 contentDescription = null,
-                tint = visualTint(category.visual),
+                tint = categoryColorOf(category.colorHex),
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -234,9 +230,7 @@ private fun CategoryManageRow(category: ManageCategoryUi, onEdit: () -> Unit) {
             imageVector = Icons.Filled.Edit,
             contentDescription = "Edit",
             tint = TextMuted,
-            modifier = Modifier
-                .size(20.dp)
-                .clickable { onEdit() }
+            modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(14.dp))
         Icon(
@@ -277,34 +271,70 @@ private fun AddCategoryButton(onClick: () -> Unit) {
     }
 }
 
-private fun visualIcon(visual: ManageCategoryVisual): ImageVector = when (visual) {
-    ManageCategoryVisual.FOOD -> Icons.Filled.Restaurant
-    ManageCategoryVisual.TRANSPORT -> Icons.Filled.DirectionsCar
-    ManageCategoryVisual.FUN -> Icons.Filled.SportsEsports
-    ManageCategoryVisual.SHOPPING -> Icons.Filled.ShoppingBag
-    ManageCategoryVisual.HEALTH -> Icons.Filled.MedicalServices
-}
-
-private fun visualBackground(visual: ManageCategoryVisual): Color = when (visual) {
-    ManageCategoryVisual.FOOD -> OrangeIconBg
-    ManageCategoryVisual.TRANSPORT -> TransportIconBg
-    ManageCategoryVisual.FUN -> PurpleIconBg
-    ManageCategoryVisual.SHOPPING -> PinkIconBg
-    ManageCategoryVisual.HEALTH -> FoodIconBg
-}
-
-private fun visualTint(visual: ManageCategoryVisual): Color = when (visual) {
-    ManageCategoryVisual.FOOD -> OrangeIconTint
-    ManageCategoryVisual.TRANSPORT -> TransportIconTint
-    ManageCategoryVisual.FUN -> PurpleIconTint
-    ManageCategoryVisual.SHOPPING -> PinkIconTint
-    ManageCategoryVisual.HEALTH -> FoodIconTint
-}
-
-@Preview(showBackground = true, showSystemUi = true)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ManageCategoryScreenPreview() {
-    MomeAppTheme {
-        ManageCategoryScreen()
-    }
+private fun AddCategoryDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var selectedIcon by remember { mutableStateOf(CATEGORY_ICON_KEYS.first()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = { onConfirm(name, selectedIcon) }) {
+                Text(text = "Simpan", color = BrandNavy, fontWeight = FontWeight.SemiBold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Batal", color = TextSecondary)
+            }
+        },
+        title = { Text(text = "Kategori Baru", color = TextPrimary, fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    singleLine = true,
+                    label = { Text(text = "Nama kategori") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Ikon", color = TextSecondary, fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    CATEGORY_ICON_KEYS.forEach { key ->
+                        val colorHex = iconColorMap[key] ?: "#1B2559"
+                        val selected = key == selectedIcon
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(categoryBackgroundOf(colorHex))
+                                .border(
+                                    width = if (selected) 2.dp else 0.dp,
+                                    color = if (selected) categoryColorOf(colorHex) else Color.Transparent,
+                                    shape = CircleShape
+                                )
+                                .clickable { selectedIcon = key },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = categoryIconOf(key),
+                                contentDescription = key,
+                                tint = categoryColorOf(colorHex),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    )
 }

@@ -18,15 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.SpaceDashboard
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -35,8 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +35,9 @@ import androidx.compose.ui.unit.sp
 import com.faezolmp.momeapp.core.utils.formatCompact
 import com.faezolmp.momeapp.core.utils.formatRupiah
 import com.faezolmp.momeapp.core.utils.formatSignedRupiah
+import com.faezolmp.momeapp.presentation.ui.categoryBackgroundOf
+import com.faezolmp.momeapp.presentation.ui.categoryColorOf
+import com.faezolmp.momeapp.presentation.ui.categoryIconOf
 import com.faezolmp.momeapp.presentation.ui.components.BottomTab
 import com.faezolmp.momeapp.presentation.ui.components.BudgetRing
 import com.faezolmp.momeapp.presentation.ui.components.CategoryProgressItem
@@ -55,19 +49,12 @@ import com.faezolmp.momeapp.presentation.ui.theme.BrandBackground
 import com.faezolmp.momeapp.presentation.ui.theme.BrandNavy
 import com.faezolmp.momeapp.presentation.ui.theme.BrandSurface
 import com.faezolmp.momeapp.presentation.ui.theme.ExpenseRed
-import com.faezolmp.momeapp.presentation.ui.theme.FoodIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.FoodIconTint
-import com.faezolmp.momeapp.presentation.ui.theme.FunAmountText
-import com.faezolmp.momeapp.presentation.ui.theme.FunIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.FunIconTint
 import com.faezolmp.momeapp.presentation.ui.theme.IncomeGreen
 import com.faezolmp.momeapp.presentation.ui.theme.MomeAppTheme
 import com.faezolmp.momeapp.presentation.ui.theme.PillBlueBg
 import com.faezolmp.momeapp.presentation.ui.theme.PillBlueText
 import com.faezolmp.momeapp.presentation.ui.theme.TextPrimary
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
-import com.faezolmp.momeapp.presentation.ui.theme.TransportIconBg
-import com.faezolmp.momeapp.presentation.ui.theme.TransportIconTint
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +62,7 @@ fun DashboardScreen(
     state: DashboardUiState,
     modifier: Modifier = Modifier,
     onSeeAllActivities: () -> Unit = {},
-    onActivityClick: (ActivityUi) -> Unit = {},
+    onActivityClick: (Long) -> Unit = {},
     onManageCategories: () -> Unit = {},
     onNotifications: () -> Unit = {},
     onDashboard: () -> Unit = {},
@@ -105,9 +92,7 @@ fun DashboardScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
-//            ScreenLabel()
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             HeaderProfile(userName = state.userName, onNotifications = onNotifications)
             Spacer(modifier = Modifier.height(20.dp))
             BudgetCard(state = state)
@@ -120,37 +105,23 @@ fun DashboardScreen(
                 onActionClick = onSeeAllActivities
             )
             Spacer(modifier = Modifier.height(12.dp))
-            state.recentActivities.forEach { activity ->
-                TransactionRow(
-                    icon = activityIcon(activity.visual),
-                    title = activity.title,
-                    subtitle = activity.time,
-                    amountText = formatSignedRupiah(activity.amount, activity.isIncome, state.currencySymbol),
-                    amountColor = if (activity.isIncome) IncomeGreen else ExpenseRed,
-                    onClick = { onActivityClick(activity) }
-                )
-                Spacer(modifier = Modifier.height(10.dp))
+            if (state.recentActivities.isEmpty()) {
+                EmptyActivity()
+            } else {
+                state.recentActivities.forEach { activity ->
+                    TransactionRow(
+                        icon = categoryIconOf(activity.iconKey),
+                        title = activity.title,
+                        subtitle = activity.time,
+                        amountText = formatSignedRupiah(activity.amount, activity.isIncome, state.currencySymbol),
+                        amountColor = if (activity.isIncome) IncomeGreen else ExpenseRed,
+                        onClick = { onActivityClick(activity.id) }
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
-    }
-}
-
-@Composable
-private fun ScreenLabel() {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = Icons.Filled.SpaceDashboard,
-            contentDescription = null,
-            tint = TextSecondary,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = "Dashboard Utama",
-            color = TextSecondary,
-            fontSize = 13.sp
-        )
     }
 }
 
@@ -195,14 +166,6 @@ private fun HeaderProfile(userName: String, onNotifications: () -> Unit) {
                 contentDescription = "Notifikasi",
                 tint = BrandNavy,
                 modifier = Modifier.size(22.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(10.dp)
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(ExpenseRed)
             )
         }
     }
@@ -265,70 +228,82 @@ private fun BudgetCard(state: DashboardUiState) {
 
 @Composable
 private fun CategorySection(state: DashboardUiState, onCategoryClick: () -> Unit) {
-    state.mainCategory?.let { main ->
-        val remaining = main.remaining ?: 0L
-        val denominator = main.spent + remaining
-        val progress = if (denominator > 0L) main.spent.toFloat() / denominator.toFloat() else 0f
+    val main = state.categories.firstOrNull()
+    val small = state.categories.drop(1).take(2)
+    if (main != null) {
+        val progress = if (state.budgetTotal > 0L) main.spent.toFloat() / state.budgetTotal.toFloat() else 0f
         CategoryProgressItem(
-            icon = categoryIcon(main.visual),
-            iconBackground = categoryBackground(main.visual),
-            iconTint = categoryTint(main.visual),
+            icon = categoryIconOf(main.iconKey),
+            iconBackground = categoryBackgroundOf(main.colorHex),
+            iconTint = categoryColorOf(main.colorHex),
             name = main.name,
             amountText = formatRupiah(main.spent, state.currencySymbol),
             progress = progress,
-            remainingText = "Sisa: ${formatCompact(remaining, state.currencySymbol)}",
+            remainingText = "Terpakai ${formatCompact(main.spent, state.currencySymbol)}",
+            progressColor = categoryColorOf(main.colorHex),
             modifier = Modifier.clickable { onCategoryClick() }
         )
         Spacer(modifier = Modifier.height(16.dp))
     }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        state.smallCategories.forEach { category ->
-            CategorySmallCard(
-                icon = categoryIcon(category.visual),
-                iconBackground = categoryBackground(category.visual),
-                iconTint = categoryTint(category.visual),
-                name = category.name,
-                amountText = formatRupiah(category.spent, state.currencySymbol),
-                amountColor = if (category.visual == CategoryVisual.FUN) FunAmountText else TextPrimary,
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { onCategoryClick() }
-            )
+    if (small.isNotEmpty()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            small.forEach { category ->
+                CategorySmallCard(
+                    icon = categoryIconOf(category.iconKey),
+                    iconBackground = categoryBackgroundOf(category.colorHex),
+                    iconTint = categoryColorOf(category.colorHex),
+                    name = category.name,
+                    amountText = formatRupiah(category.spent, state.currencySymbol),
+                    amountColor = TextPrimary,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onCategoryClick() }
+                )
+            }
         }
     }
 }
 
-private fun categoryIcon(visual: CategoryVisual): ImageVector = when (visual) {
-    CategoryVisual.FOOD -> Icons.Filled.Restaurant
-    CategoryVisual.TRANSPORT -> Icons.Filled.DirectionsCar
-    CategoryVisual.FUN -> Icons.Filled.SportsEsports
-}
-
-private fun categoryBackground(visual: CategoryVisual): Color = when (visual) {
-    CategoryVisual.FOOD -> FoodIconBg
-    CategoryVisual.TRANSPORT -> TransportIconBg
-    CategoryVisual.FUN -> FunIconBg
-}
-
-private fun categoryTint(visual: CategoryVisual): Color = when (visual) {
-    CategoryVisual.FOOD -> FoodIconTint
-    CategoryVisual.TRANSPORT -> TransportIconTint
-    CategoryVisual.FUN -> FunIconTint
-}
-
-private fun activityIcon(visual: ActivityVisual): ImageVector = when (visual) {
-    ActivityVisual.SHOPPING -> Icons.Filled.ShoppingBag
-    ActivityVisual.COFFEE -> Icons.Filled.LocalCafe
-    ActivityVisual.INCOME -> Icons.Filled.AccountBalanceWallet
+@Composable
+private fun EmptyActivity() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(BrandSurface)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Belum ada transaksi.",
+            color = TextSecondary,
+            fontSize = 13.sp
+        )
+    }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun DashboardScreenPreview() {
     MomeAppTheme {
-        DashboardScreen(state = sampleDashboardState())
+        DashboardScreen(
+            state = DashboardUiState(
+                budgetRemaining = 50_000L,
+                budgetTotal = 150_000L,
+                motivation = "Budget aman hari ini.",
+                categories = listOf(
+                    DashboardCategoryUi("Makan & Minum", "food", "#E8912E", 65_000L),
+                    DashboardCategoryUi("Transportasi", "transport", "#4B69C6", 20_000L),
+                    DashboardCategoryUi("Hiburan", "fun", "#7A5AF8", 15_000L)
+                ),
+                recentActivities = listOf(
+                    DashboardActivityUi(1L, "Belanja Mingguan", "24 Sep, 10:45", 120_000L, false, "shopping", "#DB4E96"),
+                    DashboardActivityUi(2L, "Transfer Masuk", "23 Sep, 16:15", 500_000L, true, "income", "#2FB673")
+                )
+            )
+        )
     }
 }
