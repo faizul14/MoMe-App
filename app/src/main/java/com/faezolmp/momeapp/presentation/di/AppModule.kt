@@ -9,6 +9,7 @@ import com.faezolmp.momeapp.core.domain.usecase.TransactionUseCase
 import com.faezolmp.momeapp.core.domain.usecase.UseCase
 import com.faezolmp.momeapp.core.domain.usecase.UseCaseIteractor
 import com.faezolmp.momeapp.presentation.screen.AddManual.AddTransactionViewModel
+import com.faezolmp.momeapp.presentation.screen.Confirm.ConfirmViewModel
 import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardViewModel
 import com.faezolmp.momeapp.presentation.screen.Detail.DetailViewModel
 import com.faezolmp.momeapp.presentation.screen.History.HistoryViewModel
@@ -26,6 +27,7 @@ val appModule = module {
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { HistoryViewModel(get(), get()) }
     viewModel { DetailViewModel(get(), get()) }
+    viewModel { ConfirmViewModel(get(), get()) }
     viewModel { AddTransactionViewModel(get(), get()) }
     viewModel { ManageCategoryViewModel(get(), get()) }
     viewModel { BudgetViewModel(get()) }

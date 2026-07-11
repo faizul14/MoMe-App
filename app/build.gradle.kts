@@ -100,4 +100,16 @@ dependencies {
     implementation("androidx.room:room-ktx:2.5.2")
     ksp("androidx.room:room-compiler:2.5.2")
 
+//  camerax
+    implementation("androidx.camera:camera-core:1.2.3")
+    implementation("androidx.camera:camera-camera2:1.2.3")
+    implementation("androidx.camera:camera-lifecycle:1.2.3")
+    implementation("androidx.camera:camera-view:1.2.3")
+
+//  ml kit text recognition (on-device)
+    implementation("com.google.mlkit:text-recognition:16.0.0")
+
+//  coil (tampilkan gambar bukti)
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
 }

@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.faezolmp.momeapp.core.domain.model.TransactionSource
 import com.faezolmp.momeapp.presentation.screen.AddManual.AddManualScreen
 import com.faezolmp.momeapp.presentation.screen.Confirm.ConfirmTransactionScreen
 import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardScreen
@@ -100,6 +101,11 @@ fun MomeNavHost(
         composable(MomeDestination.Scan.route) {
             ScanScreen(
                 onClose = { navController.popBackStack() },
+                onScanned = { amount, path ->
+                    navController.navigate(
+                        MomeDestination.Confirm.createRoute(amount, path, TransactionSource.SCAN.name)
+                    )
+                },
                 onDashboard = { navController.navigate(MomeDestination.Home.route) },
                 onHistory = { navController.navigate(MomeDestination.History.route) },
                 onAdd = { navController.navigate(MomeDestination.AddManual.route) },
@@ -107,14 +113,40 @@ fun MomeNavHost(
             )
         }
 
-        composable(MomeDestination.Confirm.route) {
+        composable(
+            route = MomeDestination.Confirm.route,
+            arguments = listOf(
+                navArgument(MomeDestination.Confirm.ARG_AMOUNT) {
+                    type = NavType.LongType
+                    defaultValue = 0L
+                },
+                navArgument(MomeDestination.Confirm.ARG_ATTACHMENT) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument(MomeDestination.Confirm.ARG_SOURCE) {
+                    type = NavType.StringType
+                    defaultValue = TransactionSource.SCAN.name
+                }
+            )
+        ) { backStackEntry ->
+            val args = backStackEntry.arguments
+            val amount = args?.getLong(MomeDestination.Confirm.ARG_AMOUNT) ?: 0L
+            val attachment = args?.getString(MomeDestination.Confirm.ARG_ATTACHMENT)
+                ?.takeIf { it.isNotEmpty() }
+            val source = runCatching {
+                TransactionSource.valueOf(args?.getString(MomeDestination.Confirm.ARG_SOURCE) ?: "SCAN")
+            }.getOrDefault(TransactionSource.SCAN)
             ConfirmTransactionScreen(
-                onSave = {
+                amount = amount,
+                attachmentPath = attachment,
+                source = source,
+                onBack = { navController.popBackStack() },
+                onSaved = {
                     navController.navigate(MomeDestination.Home.route) {
                         popUpTo(MomeDestination.Home.route) { inclusive = true }
                     }
-                },
-                onBack = { navController.popBackStack() }
+                }
             )
         }
 
