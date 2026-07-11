@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.faezolmp.projek_android_template"
+    namespace = "com.faezolmp.momeapp"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.faezolmp.projek_android_template"
+        applicationId = "com.faezolmp.momeapp"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
