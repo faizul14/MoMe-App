@@ -2,7 +2,6 @@ package com.faezolmp.momeapp.presentation.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,34 +54,39 @@ fun MomeBottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 8.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             BottomNavItem(
                 icon = Icons.Filled.SpaceDashboard,
                 label = "Dashboard",
                 active = activeTab == BottomTab.DASHBOARD,
-                onClick = onDashboard
+                onClick = onDashboard,
+                modifier = Modifier.weight(1f)
             )
             BottomNavItem(
                 icon = Icons.Filled.History,
                 label = "History",
                 active = activeTab == BottomTab.HISTORY,
-                onClick = onHistory
+                onClick = onHistory,
+                modifier = Modifier.weight(1f)
             )
-            ScanButton(onClick = onScan)
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                ScanButton(onClick = onScan)
+            }
             BottomNavItem(
                 icon = Icons.Filled.Add,
                 label = "Add",
                 active = activeTab == BottomTab.ADD,
-                onClick = onAdd
+                onClick = onAdd,
+                modifier = Modifier.weight(1f)
             )
             BottomNavItem(
                 icon = Icons.Filled.GridView,
                 label = "Manage",
                 active = activeTab == BottomTab.MANAGE,
-                onClick = onManage
+                onClick = onManage,
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -93,52 +97,30 @@ private fun BottomNavItem(
     icon: ImageVector,
     label: String,
     active: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    if (active) {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(BrandNavy)
-                .clickable { onClick() }
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = BrandSurface,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = label,
-                color = BrandSurface,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .clickable { onClick() }
-                .padding(horizontal = 10.dp, vertical = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = TextSecondary,
-                modifier = Modifier.size(22.dp)
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = label,
-                color = TextSecondary,
-                fontSize = 11.sp
-            )
-        }
+    val color = if (active) BrandNavy else TextSecondary
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = color,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.height(3.dp))
+        Text(
+            text = label,
+            color = color,
+            fontSize = 11.sp,
+            fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
+        )
     }
 }
 
@@ -156,15 +138,11 @@ private fun ScanButton(onClick: () -> Unit) {
             Icon(
                 imageVector = Icons.Filled.DocumentScanner,
                 contentDescription = "Scan",
-                tint = BrandSurface,
+                tint = Color.White,
                 modifier = Modifier.size(24.dp)
             )
         }
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = "Scan",
-            color = TextSecondary,
-            fontSize = 11.sp
-        )
+        Spacer(modifier = Modifier.height(3.dp))
+        Text(text = "Scan", color = TextSecondary, fontSize = 11.sp)
     }
 }

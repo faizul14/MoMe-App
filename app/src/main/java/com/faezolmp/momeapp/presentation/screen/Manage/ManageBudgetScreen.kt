@@ -104,7 +104,7 @@ fun ManageBudgetScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(12.dp))
-            ScreenLabel(text = "Manajemen Batas Harian")
+//            ScreenLabel(text = "Manajemen Batas Harian")
             Spacer(modifier = Modifier.height(12.dp))
             Header()
             Spacer(modifier = Modifier.height(20.dp))

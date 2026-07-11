@@ -91,7 +91,7 @@ fun AddManualScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(12.dp))
-            ScreenLabel(text = "Tambah Transaksi")
+//            ScreenLabel(text = "Tambah Transaksi")
             Spacer(modifier = Modifier.height(12.dp))
             Header(onBack = onBack)
             Spacer(modifier = Modifier.height(20.dp))

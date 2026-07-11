@@ -109,7 +109,7 @@ fun SettingsScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(12.dp))
-            ScreenLabel(text = "Pengaturan Umum")
+//            ScreenLabel(text = "Pengaturan Umum")
             Spacer(modifier = Modifier.height(12.dp))
             Header()
             Spacer(modifier = Modifier.height(18.dp))

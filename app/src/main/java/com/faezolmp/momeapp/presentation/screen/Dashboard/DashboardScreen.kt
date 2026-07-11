@@ -106,7 +106,7 @@ fun DashboardScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(12.dp))
-            ScreenLabel()
+//            ScreenLabel()
             Spacer(modifier = Modifier.height(12.dp))
             HeaderProfile(userName = state.userName, onNotifications = onNotifications)
             Spacer(modifier = Modifier.height(20.dp))

@@ -82,7 +82,7 @@ fun ScanScreen(
                 .padding(innerPadding)
         ) {
             Spacer(modifier = Modifier.height(12.dp))
-            ScreenLabel(text = "Scan Struk Otomatis", modifier = Modifier.padding(horizontal = 20.dp))
+//            ScreenLabel(text = "Scan Struk Otomatis", modifier = Modifier.padding(horizontal = 20.dp))
             Spacer(modifier = Modifier.height(12.dp))
             Header(
                 flashOn = flashOn,
