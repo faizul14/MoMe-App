@@ -22,7 +22,8 @@ data class HistoryItemUi(
     val isIncome: Boolean,
     val iconKey: String,
     val colorHex: String,
-    val hasAttachment: Boolean
+    val hasAttachment: Boolean,
+    val attachmentPath: String?
 )
 
 data class HistoryGroupUi(
@@ -88,7 +89,8 @@ class HistoryViewModel(
                             isIncome = transaction.isIncome,
                             iconKey = if (transaction.isIncome) "income" else (category?.iconKey ?: "other"),
                             colorHex = if (transaction.isIncome) "#2FB673" else (category?.colorHex ?: "#8A93AB"),
-                            hasAttachment = transaction.attachmentPath != null
+                            hasAttachment = transaction.attachmentPath != null,
+                            attachmentPath = transaction.attachmentPath
                         )
                     }
                 )

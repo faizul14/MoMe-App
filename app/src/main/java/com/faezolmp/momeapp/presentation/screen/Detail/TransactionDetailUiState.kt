@@ -12,6 +12,7 @@ data class TransactionDetailUiState(
     val source: String = "",
     val note: String = "",
     val hasAttachment: Boolean = false,
+    val attachmentPath: String? = null,
     val currencySymbol: String = "Rp",
     val loaded: Boolean = false
 )
@@ -27,6 +28,7 @@ fun sampleTransactionDetail(): TransactionDetailUiState = TransactionDetailUiSta
     timeLabel = "12:45",
     source = "Input Manual",
     note = "Makan siang di Boga Resto bersama tim.",
-    hasAttachment = true,
+    hasAttachment = false,
+    attachmentPath = null,
     loaded = true
 )

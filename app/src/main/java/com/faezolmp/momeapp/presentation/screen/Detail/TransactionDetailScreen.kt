@@ -30,11 +30,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.faezolmp.momeapp.core.utils.formatSignedRupiah
 import com.faezolmp.momeapp.presentation.ui.categoryBackgroundOf
 import com.faezolmp.momeapp.presentation.ui.categoryColorOf
@@ -54,6 +56,7 @@ import com.faezolmp.momeapp.presentation.ui.theme.TextPrimary
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
 import com.faezolmp.momeapp.presentation.ui.theme.WarnBg
 import com.faezolmp.momeapp.presentation.ui.theme.WarnTint
+import java.io.File
 
 @Composable
 fun TransactionDetailScreen(
@@ -76,9 +79,10 @@ fun TransactionDetailScreen(
         HeroCard(state = state)
         Spacer(modifier = Modifier.height(16.dp))
         DetailCard(state = state)
-        if (state.hasAttachment) {
+        val path = state.attachmentPath
+        if (state.hasAttachment && path != null) {
             Spacer(modifier = Modifier.height(16.dp))
-            AttachmentSection()
+            AttachmentSection(path = path)
         }
         Spacer(modifier = Modifier.height(24.dp))
         Row(
@@ -228,7 +232,7 @@ private fun RowDivider() {
 }
 
 @Composable
-private fun AttachmentSection() {
+private fun AttachmentSection(path: String) {
     Text(
         text = "Bukti Transaksi",
         color = TextSecondary,
@@ -237,24 +241,16 @@ private fun AttachmentSection() {
         letterSpacing = 0.5.sp
     )
     Spacer(modifier = Modifier.height(10.dp))
-    Column(
+    AsyncImage(
+        model = File(path),
+        contentDescription = "Bukti transaksi",
+        contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(FieldBg),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Image,
-            contentDescription = null,
-            tint = TextMuted,
-            modifier = Modifier.size(40.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Struk tersimpan", color = TextMuted, fontSize = 12.sp)
-    }
+            .background(FieldBg)
+    )
 }
 
 @Composable

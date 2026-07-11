@@ -19,6 +19,7 @@ import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardScreen
 import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardViewModel
 import com.faezolmp.momeapp.presentation.screen.Detail.DetailViewModel
 import com.faezolmp.momeapp.presentation.screen.Detail.TransactionDetailScreen
+import com.faezolmp.momeapp.presentation.screen.Edit.EditTransactionScreen
 import com.faezolmp.momeapp.presentation.screen.History.HistoryScreen
 import com.faezolmp.momeapp.presentation.screen.History.HistoryViewModel
 import com.faezolmp.momeapp.presentation.screen.Manage.ManageBudgetScreen
@@ -204,10 +205,28 @@ fun MomeNavHost(
             TransactionDetailScreen(
                 state = state,
                 onBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(MomeDestination.Edit.createRoute(id)) },
                 onDelete = {
                     viewModel.delete()
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(
+            route = MomeDestination.Edit.route,
+            arguments = listOf(
+                navArgument(MomeDestination.Edit.ARG_TRANSACTION_ID) {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments
+                ?.getLong(MomeDestination.Edit.ARG_TRANSACTION_ID) ?: 0L
+            EditTransactionScreen(
+                transactionId = id,
+                onBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
             )
         }
 

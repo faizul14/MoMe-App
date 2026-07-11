@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
@@ -89,6 +91,7 @@ fun ManageBudgetScreen(
     var eveningReminder by remember { mutableStateOf(false) }
     var threshold by remember { mutableFloatStateOf(0.8f) }
     var initialized by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.loaded) {
         if (state.loaded && !initialized) {
@@ -100,9 +103,16 @@ fun ManageBudgetScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.saved.collect {
+            snackbarHostState.showSnackbar("Batas berhasil diperbarui")
+        }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = BrandBackground,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             MomeBottomBar(
                 activeTab = BottomTab.MANAGE,

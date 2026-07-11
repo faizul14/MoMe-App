@@ -34,10 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.faezolmp.momeapp.core.utils.formatSignedRupiah
 import com.faezolmp.momeapp.presentation.ui.categoryBackgroundOf
 import com.faezolmp.momeapp.presentation.ui.categoryColorOf
@@ -57,6 +59,7 @@ import com.faezolmp.momeapp.presentation.ui.theme.PillBlueBg
 import com.faezolmp.momeapp.presentation.ui.theme.TextMuted
 import com.faezolmp.momeapp.presentation.ui.theme.TextPrimary
 import com.faezolmp.momeapp.presentation.ui.theme.TextSecondary
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -225,22 +228,17 @@ private fun HistoryRow(item: HistoryItemUi, onClick: () -> Unit) {
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
-        if (item.hasAttachment) {
+        if (item.attachmentPath != null) {
             Spacer(modifier = Modifier.width(10.dp))
-            Box(
+            AsyncImage(
+                model = File(item.attachmentPath),
+                contentDescription = "Bukti",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(42.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(FieldBg),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Image,
-                    contentDescription = null,
-                    tint = TextMuted,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+                    .background(FieldBg)
+            )
         }
     }
 }
@@ -270,7 +268,7 @@ private fun HistoryScreenPreview() {
                         label = "HARI INI",
                         date = "24 Sep 2024",
                         items = listOf(
-                            HistoryItemUi(1L, "Makan Siang", "12:45 • Makan & Minum", 45_000L, false, "food", "#E8912E", true)
+                            HistoryItemUi(1L, "Makan Siang", "12:45 • Makan & Minum", 45_000L, false, "food", "#E8912E", false, null)
                         )
                     )
                 )

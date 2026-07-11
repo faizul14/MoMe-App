@@ -14,6 +14,7 @@ import com.faezolmp.momeapp.presentation.screen.AddManual.AddTransactionViewMode
 import com.faezolmp.momeapp.presentation.screen.Confirm.ConfirmViewModel
 import com.faezolmp.momeapp.presentation.screen.Dashboard.DashboardViewModel
 import com.faezolmp.momeapp.presentation.screen.Detail.DetailViewModel
+import com.faezolmp.momeapp.presentation.screen.Edit.EditTransactionViewModel
 import com.faezolmp.momeapp.presentation.screen.History.HistoryViewModel
 import com.faezolmp.momeapp.presentation.screen.Manage.BudgetViewModel
 import com.faezolmp.momeapp.presentation.screen.Manage.ManageCategoryViewModel
@@ -30,6 +31,7 @@ val appModule = module {
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { HistoryViewModel(get(), get()) }
     viewModel { DetailViewModel(get(), get()) }
+    viewModel { EditTransactionViewModel(get(), get(), get()) }
     viewModel { ConfirmViewModel(get(), get(), get()) }
     viewModel { AddTransactionViewModel(get(), get(), get()) }
     viewModel { ManageCategoryViewModel(get(), get()) }

@@ -73,6 +73,7 @@ class DetailViewModel(
             source = sourceLabel(transaction.source),
             note = transaction.note.ifBlank { "-" },
             hasAttachment = transaction.attachmentPath != null,
+            attachmentPath = transaction.attachmentPath,
             loaded = true
         )
     }
