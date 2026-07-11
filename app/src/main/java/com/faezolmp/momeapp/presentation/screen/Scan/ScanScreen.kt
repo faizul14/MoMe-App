@@ -42,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,6 +72,10 @@ import com.faezolmp.momeapp.presentation.ui.theme.ScannerFrame
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,6 +164,7 @@ private fun CameraArea(flashOn: Boolean, onScanned: (Long, String) -> Unit) {
         }
     }
     var processing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { controller.bindToLifecycle(lifecycleOwner) }
     LaunchedEffect(flashOn) { runCatching { controller.enableTorch(flashOn) } }
@@ -179,7 +185,7 @@ private fun CameraArea(flashOn: Boolean, onScanned: (Long, String) -> Unit) {
                 enabled = !processing,
                 onClick = {
                     processing = true
-                    capturePhoto(context, controller) { amount, path ->
+                    capturePhoto(context, controller, scope) { amount, path ->
                         processing = false
                         onScanned(amount, path)
                     }
@@ -326,6 +332,7 @@ private fun Header(
 private fun capturePhoto(
     context: Context,
     controller: LifecycleCameraController,
+    scope: CoroutineScope,
     onResult: (Long, String) -> Unit
 ) {
     val file = ImageStorage.newReceiptFile(context)
@@ -335,7 +342,7 @@ private fun capturePhoto(
         ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                runOcr(context, file.absolutePath, onResult)
+                runOcr(context, file.absolutePath, scope, onResult)
             }
 
             override fun onError(exception: ImageCaptureException) {
@@ -345,14 +352,24 @@ private fun capturePhoto(
     )
 }
 
-private fun runOcr(context: Context, path: String, onResult: (Long, String) -> Unit) {
-    val image = InputImage.fromFilePath(context, Uri.fromFile(java.io.File(path)))
-    val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-    recognizer.process(image)
-        .addOnSuccessListener { visionText ->
-            onResult(ReceiptParser.parseAmount(visionText.text) ?: 0L, path)
-        }
-        .addOnFailureListener {
+private fun runOcr(context: Context, path: String, scope: CoroutineScope, onResult: (Long, String) -> Unit) {
+    scope.launch {
+        val image = runCatching {
+            withContext(Dispatchers.IO) {
+                InputImage.fromFilePath(context, Uri.fromFile(java.io.File(path)))
+            }
+        }.getOrNull()
+        if (image == null) {
             onResult(0L, path)
+            return@launch
         }
+        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                onResult(ReceiptParser.parseAmount(visionText.text) ?: 0L, path)
+            }
+            .addOnFailureListener {
+                onResult(0L, path)
+            }
+    }
 }

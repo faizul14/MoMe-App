@@ -9,9 +9,11 @@ import com.faezolmp.momeapp.core.domain.usecase.BudgetUseCase
 import com.faezolmp.momeapp.core.domain.usecase.CategoryUseCase
 import com.faezolmp.momeapp.core.domain.usecase.TransactionUseCase
 import com.faezolmp.momeapp.core.utils.DateUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,7 +33,7 @@ class DashboardViewModel(
         transactionUseCase.all()
     ) { budget, categories, transactions ->
         buildState(budget, categories, transactions)
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = DashboardUiState()
@@ -61,8 +63,9 @@ class DashboardViewModel(
             )
         }.sortedByDescending { it.spent }
 
+        val categoryById = categories.associateBy { it.id }
         val recent = transactions.sortedByDescending { it.dateTime }.take(5).map { transaction ->
-            val category = categories.find { it.id == transaction.categoryId }
+            val category = categoryById[transaction.categoryId]
             DashboardActivityUi(
                 id = transaction.id,
                 title = transaction.note.ifBlank { category?.name ?: "Transaksi" },

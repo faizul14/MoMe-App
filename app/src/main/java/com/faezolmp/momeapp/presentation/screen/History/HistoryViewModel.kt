@@ -6,9 +6,11 @@ import com.faezolmp.momeapp.core.domain.model.Category
 import com.faezolmp.momeapp.core.domain.model.Transaction
 import com.faezolmp.momeapp.core.domain.usecase.CategoryUseCase
 import com.faezolmp.momeapp.core.domain.usecase.TransactionUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -52,7 +54,7 @@ class HistoryViewModel(
         categoryUseCase.all()
     ) { transactions, categories ->
         HistoryUiState(groups = buildGroups(transactions, categories))
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HistoryUiState()
@@ -65,6 +67,7 @@ class HistoryViewModel(
         val now = System.currentTimeMillis()
         val todayKey = dayKeyFormat.format(Date(now))
         val yesterdayKey = dayKeyFormat.format(Date(now - 24L * 60L * 60L * 1000L))
+        val categoryById = categories.associateBy { it.id }
 
         return transactions
             .sortedByDescending { it.dateTime }
@@ -80,7 +83,7 @@ class HistoryViewModel(
                     label = label,
                     date = dateFormat.format(first),
                     items = items.map { transaction ->
-                        val category = categories.find { it.id == transaction.categoryId }
+                        val category = categoryById[transaction.categoryId]
                         HistoryItemUi(
                             id = transaction.id,
                             title = transaction.note.ifBlank { category?.name ?: "Transaksi" },
