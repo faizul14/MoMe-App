@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "projek-android-template"
+rootProject.name = "MomeApp"
 include(":app")
