@@ -5,9 +5,7 @@ import com.faezolmp.momeapp.core.domain.usecase.BudgetUseCase
 import com.faezolmp.momeapp.core.domain.usecase.TransactionUseCase
 import com.faezolmp.momeapp.core.utils.DateUtils
 import com.faezolmp.momeapp.core.utils.formatRupiah
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 
 class BudgetNotifier(
     private val context: Context,
@@ -15,19 +13,30 @@ class BudgetNotifier(
     private val transactionUseCase: TransactionUseCase
 ) {
 
-    suspend fun checkAfterInsert() = withContext(Dispatchers.Default) {
-        val budget = budgetUseCase.active().first() ?: return@withContext
-        if (!budget.overLimitAlert) return@withContext
+    suspend fun checkAfterInsert() {
+        val budget = budgetUseCase.active().first() ?: return
+        if (!budget.overLimitAlert || budget.amount <= 0L) return
         val (start, end) = DateUtils.periodRange(budget.period, budget.weekStartDay, System.currentTimeMillis())
         val spent = transactionUseCase.between(start, end).first()
             .filter { !it.isIncome }
             .sumOf { it.amount }
-        if (spent > budget.amount) {
-            MomeNotifications.show(
+
+        val thresholdAmount = (budget.amount * budget.warningThreshold).toLong()
+        val spentText = formatRupiah(spent, budget.currencySymbol)
+        val limitText = formatRupiah(budget.amount, budget.currencySymbol)
+
+        when {
+            spent > budget.amount -> MomeNotifications.show(
                 context = context,
                 id = MomeNotifications.NOTIF_OVER_LIMIT,
                 title = "Budget Terlampaui",
-                message = "Pengeluaran ${formatRupiah(spent, budget.currencySymbol)} sudah melebihi batas ${formatRupiah(budget.amount, budget.currencySymbol)}."
+                message = "Pengeluaran $spentText sudah melebihi batas $limitText."
+            )
+            spent >= thresholdAmount -> MomeNotifications.show(
+                context = context,
+                id = MomeNotifications.NOTIF_OVER_LIMIT,
+                title = "Mendekati Batas",
+                message = "Pengeluaran $spentText sudah mencapai ${(budget.warningThreshold * 100).toInt()}% dari batas $limitText."
             )
         }
     }

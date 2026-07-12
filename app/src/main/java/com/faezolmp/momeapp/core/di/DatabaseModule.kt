@@ -13,9 +13,11 @@ val databaseModule = module {
             MomeDatabase.DATABASE_NAME
         )
             .addCallback(MomeDatabase.seedCallback)
+            .addMigrations(MomeDatabase.MIGRATION_1_2)
             .build()
     }
     single { get<MomeDatabase>().transactionDao() }
     single { get<MomeDatabase>().categoryDao() }
     single { get<MomeDatabase>().budgetDao() }
+    single { get<MomeDatabase>().profileDao() }
 }

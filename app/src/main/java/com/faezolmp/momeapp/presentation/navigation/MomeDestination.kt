@@ -32,4 +32,6 @@ sealed class MomeDestination(val route: String) {
         const val ARG_TRANSACTION_ID = "transactionId"
         fun createRoute(transactionId: Long): String = "edit/$transactionId"
     }
+
+    object EditProfile : MomeDestination("edit_profile")
 }
