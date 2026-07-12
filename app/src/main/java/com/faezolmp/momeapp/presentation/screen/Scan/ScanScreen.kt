@@ -38,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -166,7 +167,10 @@ private fun CameraArea(flashOn: Boolean, onScanned: (Long, String) -> Unit) {
     var processing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) { controller.bindToLifecycle(lifecycleOwner) }
+    DisposableEffect(lifecycleOwner) {
+        controller.bindToLifecycle(lifecycleOwner)
+        onDispose { controller.unbind() }
+    }
     LaunchedEffect(flashOn) { runCatching { controller.enableTorch(flashOn) } }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -370,6 +374,9 @@ private fun runOcr(context: Context, path: String, scope: CoroutineScope, onResu
             }
             .addOnFailureListener {
                 onResult(0L, path)
+            }
+            .addOnCompleteListener {
+                recognizer.close()
             }
     }
 }
