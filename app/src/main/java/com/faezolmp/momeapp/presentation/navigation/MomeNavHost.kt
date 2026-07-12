@@ -25,6 +25,7 @@ import com.faezolmp.momeapp.presentation.screen.History.HistoryViewModel
 import com.faezolmp.momeapp.presentation.screen.Manage.ManageBudgetScreen
 import com.faezolmp.momeapp.presentation.screen.Manage.ManageCategoryScreen
 import com.faezolmp.momeapp.presentation.screen.Onboarding.OnboardingScreen
+import com.faezolmp.momeapp.presentation.screen.Profile.EditProfileScreen
 import com.faezolmp.momeapp.presentation.screen.Scan.ScanScreen
 import com.faezolmp.momeapp.presentation.screen.Settings.SettingsScreen
 import com.faezolmp.momeapp.presentation.screen.Statistics.StatisticsScreen
@@ -236,12 +237,17 @@ fun MomeNavHost(
 
         composable(MomeDestination.Settings.route) {
             SettingsScreen(
+                onEditProfile = { navController.navigate(MomeDestination.EditProfile.route) },
                 onCurrency = { navController.navigate(MomeDestination.ManageBudget.route) },
                 onDashboard = { navController.navigateTopLevel(MomeDestination.Home.route) },
                 onHistory = { navController.navigateTopLevel(MomeDestination.History.route) },
                 onScan = { navController.navigateTopLevel(MomeDestination.Scan.route) },
                 onAdd = { navController.navigateTopLevel(MomeDestination.AddManual.route) }
             )
+        }
+
+        composable(MomeDestination.EditProfile.route) {
+            EditProfileScreen(onBack = { navController.popBackStack() })
         }
     }
 }
